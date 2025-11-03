@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'services/cart_service.dart';
-import 'utils/notification_helper.dart';
 import 'pages/home_page.dart';
+import 'pages/login_page.dart';
+import 'services/hive_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  await CartService.init();
-  await NotificationHelper.init();
+  await HiveService.init();
 
-  runApp(const MyApp());
+  bool isLoggedIn = HiveService.isLoggedIn();
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const HomePage(username: 'user'),
+      title: 'Aplikasi Pembelian Motor Besar',
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: isLoggedIn ? const HomePage(username: '') : const LoginPage(),
     );
   }
 }

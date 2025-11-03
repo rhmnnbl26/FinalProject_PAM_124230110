@@ -10,36 +10,26 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  Future<void> _register() async {
-    String user = _usernameController.text.trim();
-    String pass = _passwordController.text.trim();
+  void _register() {
+    String username = _usernameController.text.trim();
+    String password = _passwordController.text.trim();
 
-    if (user.isEmpty || pass.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Harap isi semua field')),
-      );
-      return;
-    }
-
-    bool success = await HiveService.registerUser(user, pass);
-
-    // ✅ Tambahkan ini untuk memastikan widget masih aktif
-    if (!mounted) return;
+    bool success = HiveService.registerUser(username, password);
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registrasi berhasil! Silakan login.')),
+        const SnackBar(content: Text("Registrasi berhasil")),
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
+        MaterialPageRoute(builder: (_) => const LoginPage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Username sudah digunakan!')),
+        const SnackBar(content: Text("Username sudah terdaftar")),
       );
     }
   }
@@ -52,10 +42,8 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "Daftar Akun",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+            const Text("Daftar Akun",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 30),
             TextField(
               controller: _usernameController,
@@ -71,18 +59,17 @@ class _RegisterPageState extends State<RegisterPage> {
             ElevatedButton(
               onPressed: _register,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade700,
-                minimumSize: const Size(double.infinity, 45),
-              ),
+                  backgroundColor: Colors.green.shade700,
+                  minimumSize: const Size(double.infinity, 45)),
               child: const Text("Daftar"),
             ),
             TextButton(
               onPressed: () => Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
+                MaterialPageRoute(builder: (_) => const LoginPage()),
               ),
               child: const Text("Sudah punya akun? Login di sini"),
-            )
+            ),
           ],
         ),
       ),

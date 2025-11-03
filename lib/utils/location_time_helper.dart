@@ -1,45 +1,46 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:geocoding/geocoding.dart';
 
 class LocationTimeHelper {
-  // Mendapatkan lokasi user (kota, negara)
-  static Future<String> getUserLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  // Mendapatkan lokasi pengguna
+  Future<Position> getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) throw Exception("Location service disabled");
 
-    // Cek apakah layanan GPS aktif
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return 'Yogyakarta, Indonesia'; // fallback
-    }
-
-    // Cek izin lokasi
-    permission = await Geolocator.checkPermission();
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return 'Yogyakarta, Indonesia'; // fallback
+        throw Exception("Location permission denied");
       }
     }
-
-    if (permission == LocationPermission.deniedForever) {
-      return 'Yogyakarta, Indonesia';
-    }
-
-    // Ambil posisi
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
-    // Untuk demo, kita hanya tampilkan koordinat + teks default
-    // Kamu bisa menambahkan reverse geocoding kalau mau hasil lebih detail
-    return '(${position.latitude.toStringAsFixed(2)}, ${position.longitude.toStringAsFixed(2)}) - Indonesia';
+    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
-  // Mengambil waktu sekarang dalam zona lokal
-  static String getLocalTime({int offsetHours = 0}) {
-    final now = DateTime.now().toUtc().add(const Duration(hours: 7)); // default WIB
-    final converted = now.add(Duration(hours: offsetHours));
-    final format = DateFormat('HH:mm');
-    return format.format(converted);
+  // Mendapatkan nama kota atau tempat dari koordinat
+  Future<String> getPlaceFromPosition(Position position) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    if (placemarks.isNotEmpty) {
+      return placemarks.first.locality ?? 'Unknown Location';
+    }
+    return 'Unknown';
+  }
+
+  // Mengambil waktu berdasarkan zona
+  String getCurrentTimeByZone(String zone) {
+    DateTime now = DateTime.now().toUtc();
+    switch (zone) {
+      case 'WIB':
+        return DateFormat('HH:mm').format(now.add(const Duration(hours: 7)));
+      case 'WITA':
+        return DateFormat('HH:mm').format(now.add(const Duration(hours: 8)));
+      case 'WIT':
+        return DateFormat('HH:mm').format(now.add(const Duration(hours: 9)));
+      case 'London':
+        return DateFormat('HH:mm').format(now);
+      default:
+        return DateFormat('HH:mm').format(now);
+    }
   }
 }
