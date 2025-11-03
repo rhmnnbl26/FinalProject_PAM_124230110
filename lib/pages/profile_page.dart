@@ -11,39 +11,65 @@ class ProfilPage extends StatefulWidget {
 }
 
 class _ProfilPageState extends State<ProfilPage> {
-  String? username;
-  String? location;
-  String? currentTime;
+  String? _username;
+  String _currentLocation = 'Tidak diketahui';
+  String _currentTime = '';
+  String _selectedZone = 'WIB';
 
-  final LocationTimeHelper _helper = LocationTimeHelper();
+  final LocationTimeHelper _locationHelper = LocationTimeHelper();
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _fetchLocationAndTime();
   }
 
   Future<void> _loadUserData() async {
-    // ✅ Ambil username dari session box
-    username = HiveService.getLoggedInUser() ?? 'User';
-
-    // ✅ Ambil lokasi & waktu
-    final position = await _helper.getCurrentLocation();
-    final place = await _helper.getPlaceFromPosition(position);
-    final time = _helper.getCurrentTimeByZone('WIB');
-
-    if (!mounted) return;
+    final loggedUser = HiveService.getLoggedInUser();
     setState(() {
-      location = place;
-      currentTime = time;
+      _username = loggedUser ?? 'Guest';
     });
   }
 
-  void _logout() {
+  Future<void> _fetchLocationAndTime() async {
+    try {
+      final position = await _locationHelper.getCurrentPosition();
+      final place = await _locationHelper.getPlaceFromPosition(
+        position.latitude,
+        position.longitude,
+      );
+      final waktu = _locationHelper.getCurrentTimeByZone(_selectedZone);
+
+      if (mounted) {
+        setState(() {
+          _currentLocation = place;
+          _currentTime = waktu;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _currentLocation = 'Gagal mengambil lokasi';
+        _currentTime = 'Tidak tersedia';
+      });
+    }
+  }
+
+  Future<void> _onZoneChanged(String? newZone) async {
+    if (newZone == null) return;
+    setState(() => _selectedZone = newZone);
+    final waktu = _locationHelper.getCurrentTimeByZone(_selectedZone);
+    if (mounted) {
+      setState(() => _currentTime = waktu);
+    }
+  }
+
+  void _logout(BuildContext context) async {
     HiveService.logoutUser();
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
     );
   }
 
@@ -54,32 +80,101 @@ class _ProfilPageState extends State<ProfilPage> {
         title: const Text('Profil Pengguna'),
         backgroundColor: Colors.green.shade700,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const CircleAvatar(
+            // Foto Profil
+            CircleAvatar(
               radius: 50,
-              backgroundImage: AssetImage('assets/profile.png'),
+              backgroundColor: Colors.green.shade700,
+              child: const Icon(Icons.person, size: 60, color: Colors.white),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // Username
             Text(
-              username ?? 'User',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              _username ?? '',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 10),
-            Text(location ?? 'Mengambil lokasi...'),
-            const SizedBox(height: 10),
-            Text(currentTime ?? 'Memuat waktu...'),
-            const Spacer(),
-            ElevatedButton.icon(
-              onPressed: _logout,
-              icon: const Icon(Icons.logout),
-              label: const Text("Logout"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.shade600,
-                minimumSize: const Size(double.infinity, 45),
+            const SizedBox(height: 8),
+
+            // Lokasi Saat Ini
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.location_on, color: Colors.red),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    _currentLocation,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Dropdown Zona Waktu
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time, color: Colors.green),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Zona Waktu',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButton<String>(
+                    value: _selectedZone,
+                    items: const [
+                      DropdownMenuItem(value: 'WIB', child: Text("WIB")),
+                      DropdownMenuItem(value: 'WITA', child: Text("WITA")),
+                      DropdownMenuItem(value: 'WIT', child: Text("WIT")),
+                      DropdownMenuItem(value: 'London', child: Text("London")),
+                    ],
+                    onChanged: _onZoneChanged,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Waktu saat ini: $_currentTime',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 40),
+            // Tombol Logout
+            ElevatedButton.icon(
+              onPressed: () => _logout(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              icon: const Icon(Icons.logout),
+              label: const Text('Logout', style: TextStyle(fontSize: 18)),
             ),
           ],
         ),

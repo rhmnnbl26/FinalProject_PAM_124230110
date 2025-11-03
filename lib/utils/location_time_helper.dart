@@ -1,46 +1,69 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:intl/intl.dart';
 
 class LocationTimeHelper {
-  // Mendapatkan lokasi pengguna
-  Future<Position> getCurrentLocation() async {
+  /// Mendapatkan posisi terkini (latitude & longitude)
+  Future<Position> getCurrentPosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) throw Exception("Location service disabled");
+    if (!serviceEnabled) {
+      throw Exception('Layanan lokasi tidak aktif.');
+    }
 
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception("Location permission denied");
+        throw Exception('Izin lokasi ditolak.');
       }
     }
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  }
 
-  // Mendapatkan nama kota atau tempat dari koordinat
-  Future<String> getPlaceFromPosition(Position position) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-    if (placemarks.isNotEmpty) {
-      return placemarks.first.locality ?? 'Unknown Location';
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception('Izin lokasi ditolak permanen.');
     }
-    return 'Unknown';
+
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
   }
 
-  // Mengambil waktu berdasarkan zona
+  /// Mengubah koordinat menjadi nama tempat (kota, negara)
+  Future<String> getPlaceFromPosition(double latitude, double longitude) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        return "${place.locality}, ${place.country}";
+      } else {
+        return "Tidak diketahui";
+      }
+    } catch (e) {
+      return "Gagal mengambil lokasi";
+    }
+  }
+
+  /// Mendapatkan waktu berdasarkan zona waktu
+  /// Parameter wajib: zone → WIB / WITA / WIT / London
   String getCurrentTimeByZone(String zone) {
     DateTime now = DateTime.now().toUtc();
+
     switch (zone) {
       case 'WIB':
-        return DateFormat('HH:mm').format(now.add(const Duration(hours: 7)));
+        now = now.add(const Duration(hours: 7));
+        break;
       case 'WITA':
-        return DateFormat('HH:mm').format(now.add(const Duration(hours: 8)));
+        now = now.add(const Duration(hours: 8));
+        break;
       case 'WIT':
-        return DateFormat('HH:mm').format(now.add(const Duration(hours: 9)));
+        now = now.add(const Duration(hours: 9));
+        break;
       case 'London':
-        return DateFormat('HH:mm').format(now);
+        // UTC+0, jadi biarkan tanpa tambahan
+        break;
       default:
-        return DateFormat('HH:mm').format(now);
+        now = now.add(const Duration(hours: 7)); // Default ke WIB
     }
+
+    return DateFormat('HH:mm:ss').format(now);
   }
 }

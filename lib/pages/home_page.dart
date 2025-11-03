@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/motor_model.dart';
 import '../services/motor_service.dart';
+import '../services/currency_service.dart';
 import 'detail_page.dart';
 import 'profile_page.dart';
 
@@ -20,11 +21,21 @@ class _HomePageState extends State<HomePage> {
 
   String _searchQuery = '';
   String _selectedCategory = 'Semua';
+  String _selectedCurrency = 'IDR';
+  Map<String, double> _rates = {'IDR': 1.0, 'USD': 0.000062, 'EUR': 0.000056};
 
   @override
   void initState() {
     super.initState();
     _motorList = _motorService.getMotors();
+    _fetchRates();
+  }
+
+  Future<void> _fetchRates() async {
+    final rates = await CurrencyService.getRates();
+    setState(() {
+      _rates = rates;
+    });
   }
 
   void _filterMotors(List<MotorModel> allMotors) {
@@ -41,6 +52,10 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  double _convertPrice(int hargaIdr) {
+    return hargaIdr * (_rates[_selectedCurrency] ?? 1.0);
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -48,6 +63,25 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Text('Daftar Motor Besar'),
           backgroundColor: Colors.green.shade700,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: DropdownButton<String>(
+                value: _selectedCurrency,
+                dropdownColor: Colors.white,
+                items: const [
+                  DropdownMenuItem(value: 'IDR', child: Text("IDR")),
+                  DropdownMenuItem(value: 'USD', child: Text("USD")),
+                  DropdownMenuItem(value: 'EUR', child: Text("EUR")),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCurrency = value!;
+                  });
+                },
+              ),
+            ),
+          ],
         ),
         body: FutureBuilder<List<MotorModel>>(
           future: _motorList,
@@ -122,30 +156,35 @@ class _HomePageState extends State<HomePage> {
                     itemCount: _filteredMotors.length,
                     itemBuilder: (context, index) {
                       final motor = _filteredMotors[index];
+                      final harga = _convertPrice(motor.hargaIdr);
+                      final simbol = _selectedCurrency == 'USD'
+                          ? '\$'
+                          : _selectedCurrency == 'EUR'
+                              ? '€'
+                              : 'Rp';
+
                       return Card(
                         margin: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
+                            horizontal: 12, vertical: 8),
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailPage(
-                                name: motor.nama,
-                                price: motor.hargaIdr,
-                                brand: motor.merk,
-                                image: motor.gambar,
-                                description: motor.deskripsi,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailPage(
+                                  name: motor.nama,
+                                  price: motor.hargaIdr,
+                                  brand: motor.merk,
+                                  image: motor.gambar,
+                                  description: motor.deskripsi,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
                           child: Row(
                             children: [
                               ClipRRect(
@@ -166,9 +205,7 @@ class _HomePageState extends State<HomePage> {
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                    horizontal: 6,
-                                  ),
+                                      vertical: 10, horizontal: 6),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -176,20 +213,17 @@ class _HomePageState extends State<HomePage> {
                                       Text(
                                         motor.nama,
                                         style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                       Text(
                                         motor.merk,
                                         style: const TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 14,
-                                        ),
+                                            color: Colors.grey, fontSize: 14),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Rp ${motor.hargaIdr}",
+                                        "$simbol ${harga.toStringAsFixed(2)}",
                                         style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w600,
