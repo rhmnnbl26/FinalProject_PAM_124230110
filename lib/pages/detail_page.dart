@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/currency_service.dart';
+// ignore: unused_import
+import '../models/cart_model.dart'; // ✅ Tambahkan ini
+import '../services/cart_services.dart'; // ✅ Tambahkan ini
 
 class DetailPage extends StatefulWidget {
   final String name;
@@ -47,8 +50,8 @@ class _DetailPageState extends State<DetailPage> {
     final simbol = _selectedCurrency == 'USD'
         ? '\$'
         : _selectedCurrency == 'EUR'
-            ? '€'
-            : 'Rp';
+        ? '€'
+        : 'Rp';
 
     return Scaffold(
       appBar: AppBar(
@@ -79,25 +82,57 @@ class _DetailPageState extends State<DetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(widget.image,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.broken_image, size: 80)),
+            Image.network(
+              widget.image,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.broken_image, size: 80),
+            ),
             const SizedBox(height: 16),
-            Text(widget.brand,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              widget.brand,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 10),
             Text(widget.description),
+            const SizedBox(height: 20),
+
+            // ✅ Tombol tambah ke keranjang diperbaiki
+            ElevatedButton.icon(
+              onPressed: () async {
+                final item = CartModel(
+                  name: widget.name,
+                  brand: widget.brand,
+                  price: widget.price,
+                  image: widget.image,
+                );
+                await CartService.addToCart(item);
+
+                if (!mounted) return; // hindari error async context
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Berhasil ditambahkan ke keranjang'),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add_shopping_cart),
+              label: const Text('Tambah ke Keranjang'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade700,
+                foregroundColor: Colors.white,
+              ),
+            ),
+
             const SizedBox(height: 20),
             Text(
               "$simbol ${_convertPrice().toStringAsFixed(2)}",
               style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade800),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade800,
+              ),
             ),
           ],
         ),

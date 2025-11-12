@@ -4,10 +4,11 @@ import '../services/motor_service.dart';
 import '../services/currency_service.dart';
 import 'detail_page.dart';
 import 'profile_page.dart';
+import 'cart_page.dart'; // ✅ Tambahkan ini
 
 class HomePage extends StatefulWidget {
   final String username;
-  const HomePage({Key? key, required this.username}) : super(key: key);
+  const HomePage({super.key, required this.username});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -64,6 +65,18 @@ class _HomePageState extends State<HomePage> {
           title: const Text('Daftar Motor Besar'),
           backgroundColor: Colors.green.shade700,
           actions: [
+            // 🛒 Ikon Keranjang
+            IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CartPage()),
+                );
+              },
+            ),
+
+            // 💱 Dropdown Currency
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: DropdownButton<String>(
@@ -125,7 +138,7 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                    initialValue: _selectedCategory, // ✅ ganti dari "value" -> "initialValue"
                     decoration: InputDecoration(
                       labelText: 'Filter Kategori',
                       border: OutlineInputBorder(
