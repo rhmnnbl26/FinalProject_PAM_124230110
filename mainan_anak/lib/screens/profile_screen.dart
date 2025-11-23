@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
 import 'waktu_screen.dart';
@@ -13,12 +17,15 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
+  final ImagePicker _picker = ImagePicker();
   String _username = '';
+  File? _profileImage;
 
   @override
   void initState() {
     super.initState();
     _loadUsername();
+    _loadProfileImage();
   }
 
   Future<void> _loadUsername() async {
@@ -26,6 +33,124 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _username = username ?? 'User';
     });
+  }
+
+  Future<void> _loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final imagePath = prefs.getString('profile_image_path');
+    if (imagePath != null && File(imagePath).existsSync()) {
+      setState(() {
+        _profileImage = File(imagePath);
+      });
+    }
+  }
+
+  Future<void> _saveProfileImage(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_image_path', path);
+  }
+
+  Future<void> _pickImageSource() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Ambil Foto dari Kamera'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Pilih dari Galeri'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            if (_profileImage != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Hapus Foto', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _removeProfileImage();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        imageQuality: 70,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+
+      if (image != null) {
+        // Save to permanent location
+        final appDir = await getApplicationDocumentsDirectory();
+        final profileDir = Directory('${appDir.path}/profile');
+        
+        if (!await profileDir.exists()) {
+          await profileDir.create(recursive: true);
+        }
+
+        final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final savedImage = await File(image.path).copy('${profileDir.path}/$fileName');
+        
+        // Delete old profile image if exists
+        if (_profileImage != null && await _profileImage!.exists()) {
+          await _profileImage!.delete();
+        }
+
+        setState(() {
+          _profileImage = savedImage;
+        });
+
+        await _saveProfileImage(savedImage.path);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Foto profil berhasil diubah')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error mengambil foto: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _removeProfileImage() async {
+    if (_profileImage != null && await _profileImage!.exists()) {
+      await _profileImage!.delete();
+    }
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('profile_image_path');
+    
+    setState(() {
+      _profileImage = null;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Foto profil dihapus')),
+      );
+    }
   }
 
   Future<void> _logout() async {
@@ -67,14 +192,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             const SizedBox(height: 32),
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: Theme.of(context).primaryColor,
-              child: const Icon(
-                Icons.person,
-                size: 60,
-                color: Colors.white,
-              ),
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
+                  child: _profileImage == null
+                      ? const Icon(Icons.person, size: 60, color: Colors.white)
+                      : null,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: _pickImageSource,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Text(

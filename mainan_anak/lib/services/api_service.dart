@@ -11,8 +11,12 @@ class ApiService {
   Future<List<MotorBaru>> getMotorBaru() async {
     try {
       final response = await http.get(
-        Uri.parse('$mockApiBaseUrl/motor'),
-      );
+        Uri.parse('$mockApiBaseUrl/CHILDSPLAY'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
+
+      print('API Response Status: ${response.statusCode}');
+      print('API Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);

@@ -77,11 +77,11 @@ class DatabaseHelper {
       )
     ''');
 
-    // Insert default bengkel (Yogyakarta city center)
+    // Insert default bengkel (Koordinat rumah Anda)
     await db.insert('bengkel', {
-      'nama': 'Bengkel Motor Yogyakarta',
-      'latitude': -7.7956,
-      'longitude': 110.3695,
+      'nama': 'Bengkel Motor Rumah',
+      'latitude': -7.7482380,
+      'longitude': 110.4084390,
     });
   }
 

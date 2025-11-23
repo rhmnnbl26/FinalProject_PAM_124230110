@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/motor_listing.dart';
+import '../models/exchange_rate.dart';
 import '../services/database_helper.dart';
+import '../services/api_service.dart';
+import '../utils/currency_helper.dart';
 
 class DetailMotorScreen extends StatefulWidget {
   final int motorId;
@@ -14,9 +17,12 @@ class DetailMotorScreen extends StatefulWidget {
 }
 
 class _DetailMotorScreenState extends State<DetailMotorScreen> {
+  final ApiService _apiService = ApiService();
   MotorListing? _motor;
+  ExchangeRate? _exchangeRate;
   bool _isLoading = true;
   int _currentPhotoIndex = 0;
+  String _selectedCurrency = 'IDR';
 
   @override
   void initState() {
@@ -28,8 +34,10 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
     setState(() => _isLoading = true);
     try {
       final motor = await DatabaseHelper.instance.getMotorListingById(widget.motorId);
+      final rates = await _apiService.getExchangeRates();
       setState(() {
         _motor = motor;
+        _exchangeRate = rates;
         _isLoading = false;
       });
     } catch (e) {
@@ -42,16 +50,31 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
     }
   }
 
+  double _convertPrice(double idrPrice) {
+    if (_exchangeRate == null || _selectedCurrency == 'IDR') {
+      return idrPrice;
+    }
+    return _exchangeRate!.convertFromIdr(idrPrice, _selectedCurrency);
+  }
+
   Future<void> _openInstagram() async {
     if (_motor == null || _motor!.instagramLink.isEmpty) return;
 
-    final url = Uri.parse(_motor!.instagramLink);
-    if (await canLaunchUrl(url)) {
+    try {
+      String urlString = _motor!.instagramLink.trim();
+      
+      // Pastikan URL memiliki scheme
+      if (!urlString.startsWith('http://') && !urlString.startsWith('https://')) {
+        urlString = 'https://$urlString';
+      }
+      
+      final url = Uri.parse(urlString);
+      
       await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tidak dapat membuka link Instagram')),
+          SnackBar(content: Text('Error membuka link: $e')),
         );
       }
     }
@@ -62,6 +85,29 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Motor'),
+        actions: [
+          PopupMenuButton<String>(
+            initialValue: _selectedCurrency,
+            onSelected: (value) {
+              setState(() => _selectedCurrency = value);
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'IDR', child: Text('IDR (Rupiah)')),
+              const PopupMenuItem(value: 'USD', child: Text('USD (Dollar)')),
+              const PopupMenuItem(value: 'EUR', child: Text('EUR (Euro)')),
+              const PopupMenuItem(value: 'JPY', child: Text('JPY (Yen)')),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Text(_selectedCurrency, style: const TextStyle(fontSize: 16)),
+                  const Icon(Icons.arrow_drop_down),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -190,6 +236,8 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
   }
 
   Widget _buildPriceCard() {
+    final convertedPrice = _convertPrice(_motor!.hargaIdr);
+    
     return Card(
       elevation: 2,
       child: Padding(
@@ -202,7 +250,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
               style: TextStyle(fontSize: 16),
             ),
             Text(
-              'Rp ${_motor!.hargaIdr.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+              CurrencyHelper.formatCurrency(convertedPrice, _selectedCurrency),
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

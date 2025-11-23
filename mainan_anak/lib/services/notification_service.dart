@@ -72,7 +72,7 @@ class NotificationService {
     await _notificationsPlugin.show(
       DateTime.now().millisecondsSinceEpoch ~/ 1000,
       'Motor Berhasil Ditambahkan!',
-      'Motor "$motorName" telah berhasil ditambahkan ke listing',
+      'Motor "$motorName" telah berhasil ditambahkan ke listing=',
       notificationDetails,
     );
   }

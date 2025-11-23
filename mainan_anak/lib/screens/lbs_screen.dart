@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../services/lbs_service.dart';
 import '../models/bengkel.dart';
 import '../services/database_helper.dart';
@@ -12,16 +13,30 @@ class LbsScreen extends StatefulWidget {
 
 class _LbsScreenState extends State<LbsScreen> {
   final LbsService _lbsService = LbsService();
+  GoogleMapController? _mapController;
   bool _isLoading = false;
   bool _hasPermission = false;
   Bengkel? _bengkel;
   double? _distance;
   String? _errorMessage;
+  LatLng? _currentPosition;
+  
+  // Koordinat default: Bengkel Motor Rumah
+  static const LatLng _defaultBengkelLocation = LatLng(-7.7482380, 110.4084390);
+  
+  Set<Marker> _markers = {};
 
   @override
   void initState() {
     super.initState();
     _checkPermissionAndLoad();
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    _mapController = null;
+    super.dispose();
   }
 
   Future<void> _checkPermissionAndLoad() async {
@@ -72,20 +87,96 @@ class _LbsScreenState extends State<LbsScreen> {
   }
 
   Future<void> _calculateDistance() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     
     try {
+      final position = await _lbsService.getCurrentPosition();
       final distance = await _lbsService.calculateDistanceToBengkel();
+      
+      if (!mounted) return;
       setState(() {
         _distance = distance;
         _isLoading = false;
         _errorMessage = null;
+        
+        if (position != null) {
+          _currentPosition = LatLng(position.latitude, position.longitude);
+          _updateMarkers();
+          
+          // Move camera to show both markers - check if controller is still valid
+          if (mounted && _mapController != null && _bengkel != null) {
+            try {
+              _mapController!.animateCamera(
+                CameraUpdate.newLatLngBounds(
+                  LatLngBounds(
+                    southwest: LatLng(
+                      _currentPosition!.latitude < _bengkel!.latitude 
+                          ? _currentPosition!.latitude 
+                          : _bengkel!.latitude,
+                      _currentPosition!.longitude < _bengkel!.longitude 
+                          ? _currentPosition!.longitude 
+                          : _bengkel!.longitude,
+                    ),
+                    northeast: LatLng(
+                      _currentPosition!.latitude > _bengkel!.latitude 
+                          ? _currentPosition!.latitude 
+                          : _bengkel!.latitude,
+                      _currentPosition!.longitude > _bengkel!.longitude 
+                          ? _currentPosition!.longitude 
+                          : _bengkel!.longitude,
+                    ),
+                  ),
+                  100, // padding
+                ),
+              );
+            } catch (controllerError) {
+              // Ignore controller errors if widget is disposing
+              print('Map controller error: $controllerError');
+            }
+          }
+        }
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Error menghitung jarak: $e';
         _isLoading = false;
       });
+    }
+  }
+
+  void _updateMarkers() {
+    _markers.clear();
+    
+    // Marker bengkel
+    if (_bengkel != null) {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('bengkel'),
+          position: LatLng(_bengkel!.latitude, _bengkel!.longitude),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow: InfoWindow(
+            title: _bengkel!.nama,
+            snippet: 'Bengkel Motor',
+          ),
+        ),
+      );
+    }
+    
+    // Marker user location
+    if (_currentPosition != null) {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('user'),
+          position: _currentPosition!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          infoWindow: const InfoWindow(
+            title: 'Lokasi Anda',
+            snippet: 'Posisi saat ini',
+          ),
+        ),
+      );
     }
   }
 
@@ -192,6 +283,36 @@ class _LbsScreenState extends State<LbsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Map View
+          Card(
+            elevation: 4,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SizedBox(
+              height: 300,
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: _bengkel != null 
+                      ? LatLng(_bengkel!.latitude, _bengkel!.longitude)
+                      : _defaultBengkelLocation,
+                  zoom: 13,
+                ),
+                markers: _markers,
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+                zoomControlsEnabled: true,
+                mapType: MapType.normal,
+                onMapCreated: (GoogleMapController controller) {
+                  _mapController = controller;
+                  _updateMarkers();
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
           Card(
             elevation: 4,
             shape: RoundedRectangleBorder(
@@ -203,12 +324,12 @@ class _LbsScreenState extends State<LbsScreen> {
                 children: [
                   Icon(
                     Icons.build,
-                    size: 80,
+                    size: 60,
                     color: Theme.of(context).primaryColor,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    _bengkel?.nama ?? 'Bengkel Motor Yogyakarta',
+                    _bengkel?.nama ?? 'Bengkel Motor Rumah',
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -279,8 +400,16 @@ class _LbsScreenState extends State<LbsScreen> {
                               ),
                             ),
                             Text(
-                              '${_bengkel?.latitude.toStringAsFixed(6)}, ${_bengkel?.longitude.toStringAsFixed(6)}',
+                              '${_bengkel?.latitude.toStringAsFixed(6) ?? _defaultBengkelLocation.latitude.toStringAsFixed(6)}, ${_bengkel?.longitude.toStringAsFixed(6) ?? _defaultBengkelLocation.longitude.toStringAsFixed(6)}',
                               style: const TextStyle(fontSize: 14),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Rumah Anda, Yogyakarta',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
