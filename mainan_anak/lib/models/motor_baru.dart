@@ -1,43 +1,59 @@
 class MotorBaru {
   final String id;
-  final String nama;
-  final String merk;
-  final double hargaIdr;
-  final String kategori;
-  final String gambar;
-  final String deskripsi;
+  final String model;
+  final String brand;
+  final int cc;
+  final int year;
+  final double priceUsd;
+  final String type;
+  final String description;
+  final List<String> images;
 
   MotorBaru({
     required this.id,
-    required this.nama,
-    required this.merk,
-    required this.hargaIdr,
-    required this.kategori,
-    required this.gambar,
-    required this.deskripsi,
+    required this.model,
+    required this.brand,
+    required this.cc,
+    required this.year,
+    required this.priceUsd,
+    required this.type,
+    required this.description,
+    required this.images,
   });
 
   factory MotorBaru.fromJson(Map<String, dynamic> json) {
+    // Handle both 'image' and 'im ge' typo in API
+    List<String> imageList = [];
+    if (json['image'] != null) {
+      imageList = (json['image'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+    } else if (json['im ge'] != null) {
+      imageList = (json['im ge'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+    }
+    
     return MotorBaru(
       id: json['id'].toString(),
-      nama: json['nama'] as String? ?? '',
-      merk: json['merk'] as String? ?? '',
-      hargaIdr: (json['harga_idr'] as num?)?.toDouble() ?? 0.0,
-      kategori: json['kategori'] as String? ?? '',
-      gambar: json['gambar'] as String? ?? '',
-      deskripsi: json['deskripsi'] as String? ?? '',
+      model: json['model'] as String? ?? '',
+      brand: json['brand'] as String? ?? '',
+      cc: (json['CC'] as num?)?.toInt() ?? 0,
+      year: (json['year'] as num?)?.toInt() ?? 0,
+      priceUsd: (json['price'] as num?)?.toDouble() ?? 0.0,
+      type: json['type'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      images: imageList,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'nama': nama,
-      'merk': merk,
-      'harga_idr': hargaIdr,
-      'kategori': kategori,
-      'gambar': gambar,
-      'deskripsi': deskripsi,
+      'model': model,
+      'brand': brand,
+      'CC': cc,
+      'year': year,
+      'price': priceUsd,
+      'type': type,
+      'description': description,
+      'image': images,
     };
   }
 }

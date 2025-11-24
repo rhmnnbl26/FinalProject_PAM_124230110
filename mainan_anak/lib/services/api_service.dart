@@ -10,13 +10,18 @@ class ApiService {
   // Fetch motor baru from MockAPI
   Future<List<MotorBaru>> getMotorBaru() async {
     try {
+      final url = '$mockApiBaseUrl/motor';
+      print('Fetching from URL: $url');
+      
       final response = await http.get(
-        Uri.parse('$mockApiBaseUrl/CHILDSPLAY'),
+        Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 10));
 
       print('API Response Status: ${response.statusCode}');
-      print('API Response Body: ${response.body}');
+      if (response.statusCode != 200) {
+        print('API Response Body: ${response.body}');
+      }
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
@@ -63,6 +68,43 @@ class ApiService {
     } catch (e) {
       print('Error converting currency: $e');
       return idrAmount;
+    }
+  }
+
+  // Fetch motors by brand
+  Future<List<MotorBaru>> getMotorByBrand(String brand) async {
+    try {
+      final allMotors = await getMotorBaru();
+      return allMotors.where((motor) => motor.brand.toLowerCase() == brand.toLowerCase()).toList();
+    } catch (e) {
+      print('Error fetching motors by brand: $e');
+      rethrow;
+    }
+  }
+
+  // Convert USD to other currencies
+  Future<double> convertFromUsd(double usdAmount, String targetCurrency) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://api.frankfurter.app/latest?from=USD&to=$targetCurrency'),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final rate = jsonData['rates'][targetCurrency];
+        return usdAmount * rate;
+      } else {
+        throw Exception('Failed to convert currency');
+      }
+    } catch (e) {
+      print('Error converting currency: $e');
+      // Default rates if API fails
+      switch (targetCurrency) {
+        case 'IDR': return usdAmount * 15800;
+        case 'EUR': return usdAmount * 0.92;
+        case 'JPY': return usdAmount * 149.5;
+        default: return usdAmount;
+      }
     }
   }
 }
