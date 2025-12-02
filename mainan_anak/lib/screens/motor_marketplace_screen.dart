@@ -394,7 +394,7 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
     }
 
     return SliverPadding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
@@ -417,17 +417,27 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
+            offset: Offset(0, 30 * (1 - value)),
             child: child,
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.1),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF2196F3).withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Material(
           color: Colors.transparent,
@@ -439,97 +449,217 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
               );
               _loadMotors();
             },
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Hero(
-                    tag: 'motor_${motor.id}',
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: motor.fotoPath1 != null
-                          ? Image.file(
-                              File(motor.fotoPath1!),
-                              width: 110,
-                              height: 110,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
-                            )
-                          : _buildPlaceholderImage(),
+            borderRadius: BorderRadius.circular(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image section with badges
+                Stack(
+                  children: [
+                    Hero(
+                      tag: 'motor_${motor.id}',
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        child: motor.fotoPath1 != null
+                            ? Image.file(
+                                File(motor.fotoPath1!),
+                                width: double.infinity,
+                                height: 200,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
+                              )
+                            : _buildPlaceholderImage(),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    // Gradient overlay
+                    Positioned.fill(
+                      child: Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2196F3).withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.3),
+                            ],
                           ),
-                          child: Text(
-                            motor.brand,
-                            style: const TextStyle(
-                              color: Color(0xFF2196F3),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    // Brand badge
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF2196F3).withOpacity(0.4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          motor.nama,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: -0.5,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(Icons.speed, size: 14, color: Colors.grey[500]),
-                            const SizedBox(width: 4),
-                            Text('${motor.cc}cc', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
-                            const SizedBox(width: 12),
-                            Icon(Icons.calendar_today, size: 14, color: Colors.grey[500]),
-                            const SizedBox(width: 4),
-                            Text('${motor.tahun}', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
                           ],
                         ),
-                        const SizedBox(height: 4),
-                        if (distance != null)
-                          Row(
+                        child: Text(
+                          motor.brand,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Distance badge
+                    if (distance != null)
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.location_on, size: 14, color: Colors.grey[500]),
+                              const Icon(Icons.location_on, size: 14, color: Color(0xFF2196F3)),
                               const SizedBox(width: 4),
                               Text(
                                 _lbsService.formatDistance(distance),
-                                style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Rp ${_formatPrice(motor.hargaIdr)}',
+                        ),
+                      ),
+                    // Condition badge
+                    Positioned(
+                      bottom: 12,
+                      left: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: motor.kondisi == 'baru' 
+                              ? const Color(0xFF4CAF50).withOpacity(0.9)
+                              : const Color(0xFFFF9800).withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          motor.kondisi == 'baru' ? 'NEW' : 'USED',
                           style: const TextStyle(
-                            fontSize: 20,
+                            color: Colors.white,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF2196F3),
+                            letterSpacing: 0.5,
                           ),
                         ),
-                      ],
+                      ),
                     ),
+                  ],
+                ),
+                // Info section
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        motor.nama,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: -0.5,
+                          height: 1.3,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      // Specs row
+                      Row(
+                        children: [
+                          _buildSpecBadge(Icons.speed, '${motor.cc}cc'),
+                          const SizedBox(width: 12),
+                          _buildSpecBadge(Icons.calendar_today, '${motor.tahun}'),
+                          const SizedBox(width: 12),
+                          _buildSpecBadge(Icons.settings, motor.kondisi == 'baru' ? 'Brand New' : 'Pre-owned'),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Price and action
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Price',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[500],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Rp ${_formatPrice(motor.hargaIdr)}',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2196F3),
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF2196F3).withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -537,15 +667,44 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
     );
   }
 
+  Widget _buildSpecBadge(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF252525),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.grey[400]),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey[300],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPlaceholderImage() {
     return Container(
-      width: 110,
-      height: 110,
-      decoration: BoxDecoration(
-        color: const Color(0xFF121212),
-        borderRadius: BorderRadius.circular(12),
+      width: double.infinity,
+      height: 200,
+      decoration: const BoxDecoration(
+        color: Color(0xFF121212),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Icon(Icons.motorcycle, size: 50, color: Colors.grey[700]),
+      child: Icon(Icons.motorcycle, size: 80, color: Colors.grey[700]),
     );
   }
 

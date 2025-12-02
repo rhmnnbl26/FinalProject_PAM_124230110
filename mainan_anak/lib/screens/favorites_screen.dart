@@ -13,17 +13,28 @@ class FavoritesScreen extends StatefulWidget {
   State<FavoritesScreen> createState() => _FavoritesScreenState();
 }
 
-class _FavoritesScreenState extends State<FavoritesScreen> {
+class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProviderStateMixin {
   List<MotorListing> _favoriteMotors = [];
   bool _isLoading = true;
   final AuthService _authService = AuthService();
   final LbsService _lbsService = LbsService();
   Map<int, double?> _motorDistances = {};
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
     _loadFavorites();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadFavorites() async {
@@ -52,6 +63,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           _motorDistances = distances;
           _isLoading = false;
         });
+        _animationController.forward();
       } else {
         if (!mounted) return;
         setState(() => _isLoading = false);

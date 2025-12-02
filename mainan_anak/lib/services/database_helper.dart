@@ -5,31 +5,58 @@ import '../models/motor_listing.dart';
 import '../models/bengkel.dart';
 import '../models/voucher.dart';
 
+/// ============================================================================
+/// DATABASE HELPER - SQLITE LOCAL DATABASE MANAGEMENT
+/// ============================================================================
+/// File ini adalah CORE untuk semua operasi database lokal.
+/// 
+/// PENTING UNTUK PRESENTASI:
+/// - Menggunakan SQLITE (local database - materi wajib!)
+/// - Ada 8 TABEL berbeda untuk berbagai fitur
+/// - FULL CRUD operations (Create, Read, Update, Delete)
+/// - Relational database dengan foreign keys
+/// 
+/// TEKNOLOGI:
+/// - sqflite: ^2.3.0 untuk SQLite database
+/// - path: untuk database file path
+/// - Singleton pattern untuk instance management
+/// ============================================================================
+
 class DatabaseHelper {
+  /// Singleton pattern: hanya ada 1 instance DatabaseHelper di seluruh app
+  /// PRESENTASI: Ini best practice untuk database management
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
 
-  DatabaseHelper._init();
+  DatabaseHelper._init(); // Private constructor
 
+  /// Get database instance (lazy initialization)
+  /// Jika belum ada → create baru, jika sudah ada → return yang lama
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('mainan_anak.db');
+    _database = await _initDB('mainan_anak.db'); // Database filename
     return _database!;
   }
 
+  /// Initialize database
+  /// FLOW: Get database path → Open/create database → Set version
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
+    final dbPath = await getDatabasesPath(); // Android: /data/data/.../databases/
+    final path = join(dbPath, filePath);      // Full path: .../mainan_anak.db
 
     return await openDatabase(
       path,
-      version: 4, // Increment version for user_id in vouchers
-      onCreate: _createDB,
-      onUpgrade: _upgradeDB,
+      version: 4, // Database version (untuk migration/upgrade)
+      onCreate: _createDB,     // Callback saat create database baru
+      onUpgrade: _upgradeDB,   // Callback saat upgrade version
     );
   }
 
+  // ========== CREATE DATABASE TABLES ==========
+  /// Dipanggil HANYA sekali saat database pertama kali dibuat
+  /// PRESENTASI: Jelaskan struktur 8 tabel yang ada
   Future<void> _createDB(Database db, int version) async {
+    // SQL data types (constants untuk consistency)
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
     const intType = 'INTEGER NOT NULL';
@@ -38,112 +65,132 @@ class DatabaseHelper {
     const realTypeNull = 'REAL';
     const intTypeNull = 'INTEGER';
 
-    // User table
+    // ========== TABEL #1: USERS ==========
+    /// Menyimpan data user (username, hashed password, salt)
+    /// PRESENTASI: Ini untuk autentikasi (register & login)
     await db.execute('''
       CREATE TABLE users (
         id $idType,
-        username $textType UNIQUE,
-        password_hash $textType,
-        salt $textType
+        username $textType UNIQUE,    -- UNIQUE: tidak boleh duplicate
+        password_hash $textType,      -- SHA-256 hashed password
+        salt $textType                -- Unique salt per user
       )
     ''');
 
-    // Motor Listing table
+    // ========== TABEL #2: MOTOR LISTING (MAIN CRUD) ==========
+    /// ⭐ INI ADALAH TABEL UTAMA UNTUK CRUD OPERATIONS ⭐
+    /// Menyimpan iklan motor bekas yang dijual oleh user
+    /// 
+    /// FITUR:
+    /// - Multiple photos (5 foto)
+    /// - Geolocation (latitude, longitude)
+    /// - User ownership (foreign key ke users)
+    /// - Instagram link untuk contact seller
     await db.execute('''
       CREATE TABLE motor_listing (
         id $idType,
-        nama $textType,
-        brand $textType,
-        cc $intType,
-        tahun $intType,
-        harga_idr $realType,
-        kilometer $intType,
-        kondisi $textType,
-        deskripsi $textType,
-        lokasi $textType,
-        latitude $realTypeNull,
-        longitude $realTypeNull,
-        foto_path_1 $textTypeNull,
-        foto_path_2 $textTypeNull,
-        foto_path_3 $textTypeNull,
-        foto_path_4 $textTypeNull,
-        foto_path_5 $textTypeNull,
-        instagram_link $textType,
-        kontak_opsional $textTypeNull,
-        user_id $intTypeNull
+        nama $textType,               -- Nama motor (contoh: "Honda CBR 250RR")
+        brand $textType,              -- Brand (Honda, Yamaha, Kawasaki, dll)
+        cc $intType,                  -- Kapasitas mesin (contoh: 250)
+        tahun $intType,               -- Tahun produksi (contoh: 2020)
+        harga_idr $realType,          -- Harga dalam Rupiah
+        kilometer $intType,           -- Jarak tempuh (contoh: 5000 km)
+        kondisi $textType,            -- 'baru' atau 'bekas'
+        deskripsi $textType,          -- Deskripsi lengkap motor
+        lokasi $textType,             -- Lokasi (contoh: "Jakarta Selatan")
+        latitude $realTypeNull,       -- GPS latitude (untuk LBS)
+        longitude $realTypeNull,      -- GPS longitude (untuk LBS)
+        foto_path_1 $textTypeNull,    -- Path foto 1 (local storage)
+        foto_path_2 $textTypeNull,    -- Path foto 2
+        foto_path_3 $textTypeNull,    -- Path foto 3
+        foto_path_4 $textTypeNull,    -- Path foto 4
+        foto_path_5 $textTypeNull,    -- Path foto 5
+        instagram_link $textType,     -- Link Instagram seller
+        kontak_opsional $textTypeNull, -- Kontak tambahan (WhatsApp, dll)
+        user_id $intTypeNull          -- Foreign key: pemilik motor (relasi ke users)
       )
     ''');
 
-    // Bengkel table
+    // ========== TABEL #3: BENGKEL ==========
+    /// Data bengkel untuk booking service motor
+    /// PRESENTASI: Digunakan untuk LBS (Location-Based Service)
     await db.execute('''
       CREATE TABLE bengkel (
         id $idType,
         nama $textType,
-        latitude $realType,
-        longitude $realType
+        latitude $realType,           -- GPS latitude bengkel
+        longitude $realType           -- GPS longitude bengkel
       )
     ''');
 
-    // Favorites table
+    // ========== TABEL #4: FAVORITES (WISHLIST) ==========
+    /// Menyimpan motor favorit per user
+    /// PRESENTASI: Relasi Many-to-Many (user ↔ motor)
     await db.execute('''
       CREATE TABLE favorites (
         id $idType,
-        user_id $intType,
-        motor_id $intType,
-        created_at $textType,
-        UNIQUE(user_id, motor_id)
+        user_id $intType,             -- Foreign key ke users
+        motor_id $intType,            -- Foreign key ke motor_listing
+        created_at $textType,         -- Timestamp
+        UNIQUE(user_id, motor_id)     -- Prevent duplicate favorite
       )
     ''');
 
-    // Voucher table
+    // ========== TABEL #5: VOUCHERS ==========
+    /// Voucher diskon untuk booking service
+    /// FITUR: Shake detector, bengkel reward, expiry date
     await db.execute('''
       CREATE TABLE vouchers (
         id $idType,
-        code $textType UNIQUE,
-        title $textType,
-        description $textType,
-        discountPercent $intType,
-        type $textType,
-        dateObtained $textType,
-        expiryDate $textType,
-        dateUsed $textTypeNull,
-        isUsed $intType DEFAULT 0,
-        bengkelName $textTypeNull,
-        bengkelDistance $realTypeNull,
-        booking_id $intTypeNull,
-        user_id $intTypeNull
+        code $textType UNIQUE,        -- Voucher code (contoh: "SKE-12345")
+        title $textType,              -- Judul voucher
+        description $textType,        -- Deskripsi
+        discountPercent $intType,     -- Persentase diskon (contoh: 15)
+        type $textType,               -- 'shake' atau 'bengkel'
+        dateObtained $textType,       -- Tanggal dapat voucher
+        expiryDate $textType,         -- Tanggal kadaluarsa
+        dateUsed $textTypeNull,       -- Tanggal pakai voucher (null jika belum)
+        isUsed $intType DEFAULT 0,    -- 0 = belum pakai, 1 = sudah pakai
+        bengkelName $textTypeNull,    -- Nama bengkel (jika voucher dari bengkel)
+        bengkelDistance $realTypeNull, -- Jarak ke bengkel (untuk tracking)
+        booking_id $intTypeNull,      -- Foreign key ke bookings (jika sudah dipakai)
+        user_id $intTypeNull          -- Foreign key ke users (pemilik voucher)
       )
     ''');
 
-    // Bookings table
+    // ========== TABEL #6: BOOKINGS ==========
+    /// Sistem booking service bengkel
+    /// FITUR KOMPLEKS: Queue management, voucher discount, QR code
     await db.execute('''
       CREATE TABLE bookings (
         id $idType,
-        user_id $intType,
-        bengkel_id $intType,
-        motor_merk $textType,
-        motor_tipe $textType,
-        motor_tahun $intType,
-        motor_plat $textType,
-        service_type $textType,
-        booking_date $textType,
-        booking_time_slot $textType,
-        queue_number $textType,
-        notes $textTypeNull,
-        original_price $realType,
-        discount_amount $realType DEFAULT 0,
-        final_price $realType,
-        voucher_id $intTypeNull,
-        voucher_code $textTypeNull,
-        status $textType DEFAULT 'confirmed',
-        booking_code $textType UNIQUE,
-        qr_code_data $textTypeNull,
-        created_at $textType,
-        updated_at $textTypeNull
+        user_id $intType,             -- Foreign key: siapa yang booking
+        bengkel_id $intType,          -- Foreign key: bengkel mana
+        motor_merk $textType,         -- Merk motor yang di-service
+        motor_tipe $textType,         -- Tipe motor
+        motor_tahun $intType,         -- Tahun motor
+        motor_plat $textType,         -- Plat nomor motor
+        service_type $textType,       -- 'ringan', 'sedang', 'besar'
+        booking_date $textType,       -- Tanggal booking (YYYY-MM-DD)
+        booking_time_slot $textType,  -- Jam booking (08:00, 09:00, dst)
+        queue_number $textType,       -- Nomor antrian (contoh: 3)
+        notes $textTypeNull,          -- Catatan tambahan
+        original_price $realType,     -- Harga asli (sebelum diskon)
+        discount_amount $realType DEFAULT 0, -- Jumlah diskon (dari voucher)
+        final_price $realType,        -- Harga akhir (setelah diskon)
+        voucher_id $intTypeNull,      -- Foreign key ke vouchers
+        voucher_code $textTypeNull,   -- Kode voucher yang dipakai
+        status $textType DEFAULT 'confirmed', -- 'confirmed', 'completed', 'cancelled'
+        booking_code $textType UNIQUE, -- Booking code unik (BK20241203001)
+        qr_code_data $textTypeNull,   -- Data untuk generate QR code
+        created_at $textType,         -- Timestamp create
+        updated_at $textTypeNull      -- Timestamp update
       )
     ''');
 
-    // Booking slots table
+    // ========== TABEL #7: BOOKING SLOTS ==========
+    /// Manajemen slot waktu booking (prevent double booking)
+    /// PRESENTASI: Ini memastikan 1 jam hanya bisa 1 booking
     await db.execute('''
       CREATE TABLE booking_slots (
         id $idType,

@@ -4,48 +4,91 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'services/local_notification_service.dart';
 import 'screens/splash_screen.dart';
 
+/// ============================================================================
+/// MAIN ENTRY POINT - APLIKASI START DARI SINI
+/// ============================================================================
+/// File ini adalah entry point aplikasi (file pertama yang dijalankan).
+/// 
+/// PENTING UNTUK PRESENTASI:
+/// - Inisialisasi services sebelum app run
+/// - Setup theme & UI styling
+/// - Navigation flow dimulai dari SplashScreen
+/// 
+/// FLOW APLIKASI:
+/// main() → MyApp → SplashScreen → (check session) → LoginScreen/MainNavigation
+/// ============================================================================
+
 void main() async {
+  /// WidgetsFlutterBinding: Ensure Flutter framework siap sebelum async operations
+  /// WAJIB untuk semua async operations di main()
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize date formatting for Indonesian locale
+  // ========== INITIALIZATION SERVICES ==========
+  /// PRESENTASI: Ini adalah setup yang dilakukan SEBELUM app berjalan
+  
+  /// 1. Initialize date formatting untuk locale Indonesia
+  /// Digunakan untuk format tanggal (contoh: "3 Desember 2024")
   await initializeDateFormatting('id_ID', null);
   
-  // Set system UI overlay style
+  /// 2. Set system UI style (status bar & navigation bar)
+  /// PRESENTASI: Ini membuat UI terlihat modern & fullscreen
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF121212),
+      statusBarColor: Colors.transparent,        // Transparent status bar
+      statusBarIconBrightness: Brightness.light, // White icons
+      systemNavigationBarColor: Color(0xFF121212), // Dark nav bar
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
   
-  // Initialize local notification service
+  /// 3. Initialize notification service (FITUR BONUS!)
+  /// PRESENTASI: Setup notification channels untuk Android
+  /// Notification digunakan untuk: booking confirmation, voucher rewards
   await LocalNotificationService.instance.initialize();
   
+  /// 4. Run app!
   runApp(const MyApp());
 }
 
+/// ========== ROOT WIDGET ==========
+/// MyApp adalah root widget dari seluruh aplikasi
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Children\'s Toys',
-      debugShowCheckedModeBanner: false,
+      title: 'Children\'s Toys', // Nama app (muncul di recent apps)
+      debugShowCheckedModeBanner: false, // Hide debug banner (production ready)
+      
+      /// ========== THEME CONFIGURATION ==========
+      /// PRESENTASI: Custom dark theme untuk modern look
+      /// Jelaskan bahwa ini adalah Material Design 3 (modern)
       theme: _buildPremiumDarkTheme(),
-      home: const SplashScreen(),
+      
+      /// ========== NAVIGATION FLOW START ==========
+      /// FLOW untuk PRESENTASI:
+      /// SplashScreen (3 detik loading)
+      ///     ↓
+      /// Check SharedPreferences (isLoggedIn?)
+      ///     ↓
+      /// true  → MainNavigation (Home, Jual Motor, Motor Care, Profile)
+      /// false → LoginScreen (Form login/register)
+      home: const SplashScreen(), // Entry screen
     );
   }
 
+  /// ========== CUSTOM DARK THEME ==========
+  /// PRESENTASI: Jelaskan theme & color scheme
+  /// Ini adalah Material Design 3 dengan custom colors
   ThemeData _buildPremiumDarkTheme() {
-    const primaryColor = Color(0xFF2196F3); // Modern Blue
-    const accentBlue = Color(0xFF1565C0); // Dark Blue
-    const bgDark = Color(0xFF121212); // Darker background
-    const bgCard = Color(0xFF1E1E1E); // Card background
-    const textPrimary = Color(0xFFFFFFFF); // White text
-    const textSecondary = Color(0xFFB0B0B0); // Grey text
+    // Color palette constants
+    const primaryColor = Color(0xFF2196F3);   // Modern Blue (primary actions)
+    const accentBlue = Color(0xFF1565C0);     // Dark Blue (secondary)
+    const bgDark = Color(0xFF121212);         // Dark background (modern dark mode)
+    const bgCard = Color(0xFF1E1E1E);         // Card background (slightly lighter)
+    const textPrimary = Color(0xFFFFFFFF);    // White text (high contrast)
+    const textSecondary = Color(0xFFB0B0B0);  // Grey text (secondary info)
 
     return ThemeData(
       useMaterial3: true,

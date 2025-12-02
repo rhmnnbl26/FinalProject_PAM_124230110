@@ -17,7 +17,7 @@ class BookingFormScreen extends StatefulWidget {
   State<BookingFormScreen> createState() => _BookingFormScreenState();
 }
 
-class _BookingFormScreenState extends State<BookingFormScreen> {
+class _BookingFormScreenState extends State<BookingFormScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final BookingService _bookingService = BookingService.instance;
   final VoucherService _voucherService = VoucherService();
@@ -38,16 +38,27 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   List<Voucher> _availableVouchers = [];
   List<BookingSlot> _availableSlots = [];
   bool _isLoadingSlots = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+    _animationController.forward();
     _loadVouchers();
     _loadAvailableSlots();
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     _merkController.dispose();
     _tipeController.dispose();
     _tahunController.dispose();
@@ -155,11 +166,13 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Booking Servis')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
             const Text(
               '1. Informasi Motor',
               style: TextStyle(
@@ -499,6 +512,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
             const SizedBox(height: 32),
           ],
         ),
+      ),
       ),
     );
   }

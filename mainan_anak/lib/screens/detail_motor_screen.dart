@@ -19,7 +19,7 @@ class DetailMotorScreen extends StatefulWidget {
   State<DetailMotorScreen> createState() => _DetailMotorScreenState();
 }
 
-class _DetailMotorScreenState extends State<DetailMotorScreen> {
+class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final AuthService _authService = AuthService();
   final LbsService _lbsService = LbsService();
@@ -31,12 +31,27 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
   int _currentPhotoIndex = 0;
   String _selectedCurrency = 'IDR';
   double? _distanceToMotor;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
     _loadMotorDetail();
     _loadCurrentUser();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCurrentUser() async {
@@ -81,6 +96,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
         _distanceToMotor = distance;
         _isLoading = false;
       });
+      _animationController.forward();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -284,7 +300,9 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _motor == null
               ? const Center(child: Text('Motor tidak ditemukan'))
-              : SingleChildScrollView(
+              : FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -356,6 +374,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
                       ),
                     ],
                   ),
+                ),
                 ),
     );
   }
