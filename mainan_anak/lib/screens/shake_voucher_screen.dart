@@ -90,7 +90,9 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
       if (mounted) {
         await _showVoucherSuccessDialog(savedVoucher);
         // Return to previous screen with success
-        Navigator.pop(context, true);
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
       }
     } catch (e) {
       if (mounted) {

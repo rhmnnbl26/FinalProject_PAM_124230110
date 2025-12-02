@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
+import '../services/local_notification_service.dart';
 import 'login_screen.dart';
 import 'waktu_screen.dart';
 import 'favorites_screen.dart';
@@ -75,7 +76,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (_profileImage != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Hapus Foto', style: TextStyle(color: Colors.red)),
+                title: const Text(
+                  'Hapus Foto',
+                  style: TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _removeProfileImage();
@@ -100,14 +104,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Save to permanent location
         final appDir = await getApplicationDocumentsDirectory();
         final profileDir = Directory('${appDir.path}/profile');
-        
+
         if (!await profileDir.exists()) {
           await profileDir.create(recursive: true);
         }
 
         final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final savedImage = await File(image.path).copy('${profileDir.path}/$fileName');
-        
+        final savedImage = await File(
+          image.path,
+        ).copy('${profileDir.path}/$fileName');
+
         // Delete old profile image if exists
         if (_profileImage != null && await _profileImage!.exists()) {
           await _profileImage!.delete();
@@ -127,9 +133,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error mengambil foto: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error mengambil foto: $e')));
       }
     }
   }
@@ -138,18 +144,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_profileImage != null && await _profileImage!.exists()) {
       await _profileImage!.delete();
     }
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('profile_image_path');
-    
+
     setState(() {
       _profileImage = null;
     });
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Foto profil dihapus')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Foto profil dihapus')));
     }
   }
 
@@ -220,13 +226,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       final success = await _authService.deleteAccount();
-      
+
       if (!mounted) return;
       Navigator.pop(context); // Close loading
 
@@ -237,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        
+
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
           (route) => false,
@@ -253,12 +257,126 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _showTestNotificationDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text(
+          'Test Notifikasi',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Pilih jenis notifikasi yang ingin dicoba:',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 16),
+            _buildTestButton(
+              'Notifikasi Voucher',
+              Icons.local_offer,
+              Colors.green,
+              () async {
+                await LocalNotificationService.instance.showVoucherNotification(
+                  title: 'Test Voucher',
+                  voucherTitle: 'Diskon Service Besar',
+                  discountPercent: 30,
+                  expiryDate: '31 Des 2025',
+                );
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('✅ Notifikasi voucher terkirim!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildTestButton(
+              'Notifikasi Booking',
+              Icons.bookmark_add,
+              Colors.blue,
+              () async {
+                await LocalNotificationService.instance.showBookingNotification(
+                  motorName: 'Kawasaki Ninja H2R',
+                  serviceType: 'Service Besar',
+                  bookingDate: 'Sabtu, 7 Desember 2025',
+                  timeSlot: '10:00 - 11:00',
+                  queueNumber: '001',
+                );
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('✅ Notifikasi booking terkirim!'),
+                      backgroundColor: Colors.blue,
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildTestButton(
+              'Notifikasi Motor Ditambah',
+              Icons.motorcycle,
+              Colors.orange,
+              () async {
+                await LocalNotificationService.instance
+                    .showMotorAddedNotification('Ducati Panigale V4');
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('✅ Notifikasi motor terkirim!'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestButton(
+    String title,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white),
+        label: Text(title),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil'),
-      ),
+      appBar: AppBar(title: const Text('Profil')),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -268,7 +386,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CircleAvatar(
                   radius: 60,
                   backgroundColor: Theme.of(context).primaryColor,
-                  backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
+                  backgroundImage: _profileImage != null
+                      ? FileImage(_profileImage!)
+                      : null,
                   child: _profileImage == null
                       ? const Icon(Icons.person, size: 60, color: Colors.white)
                       : null,
@@ -298,13 +418,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 16),
             Text(
               _username,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 32),
-            
+
             // Menu items
             ListTile(
               leading: const Icon(Icons.favorite),
@@ -332,7 +449,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             const Divider(),
-            
+
+            // Test Notifications
+            ListTile(
+              leading: const Icon(
+                Icons.notifications_active,
+                color: Colors.orange,
+              ),
+              title: const Text('Test Notifikasi'),
+              subtitle: const Text('Coba kirim notifikasi test'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: _showTestNotificationDialog,
+            ),
+            const Divider(),
+
             const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -345,7 +475,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.school, color: Theme.of(context).primaryColor),
+                          Icon(
+                            Icons.school,
+                            color: Theme.of(context).primaryColor,
+                          ),
                           const SizedBox(width: 8),
                           const Text(
                             'Saran & Kesan',
@@ -385,7 +518,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),

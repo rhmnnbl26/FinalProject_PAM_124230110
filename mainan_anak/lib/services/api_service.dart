@@ -2,26 +2,24 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/motor_baru.dart';
 import '../models/exchange_rate.dart';
+import '../models/apparel.dart';
+import '../models/aksesoris.dart';
 
 class ApiService {
   static const String mockApiBaseUrl = 'https://69063273ee3d0d14c13529b5.mockapi.io';
   static const String exchangeRateApiUrl = 'https://api.frankfurter.app/latest';
+  static const String apparelApiUrl = 'https://692f397f91e00bafccd6f9b3.mockapi.io/apparel';
+  static const String aksesorisApiUrl = 'https://692f397f91e00bafccd6f9b3.mockapi.io/aksesoris';
 
   // Fetch motor baru from MockAPI
   Future<List<MotorBaru>> getMotorBaru() async {
     try {
       final url = '$mockApiBaseUrl/motor';
-      print('Fetching from URL: $url');
       
       final response = await http.get(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 10));
-
-      print('API Response Status: ${response.statusCode}');
-      if (response.statusCode != 200) {
-        print('API Response Body: ${response.body}');
-      }
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
@@ -30,7 +28,6 @@ class ApiService {
         throw Exception('Failed to load motor baru: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching motor baru: $e');
       rethrow;
     }
   }
@@ -50,7 +47,6 @@ class ApiService {
         throw Exception('Failed to load exchange rates: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching exchange rates: $e');
       // Return default rates if API fails
       return ExchangeRate(
         usd: 0.000063, // Approximate IDR to USD
@@ -66,7 +62,6 @@ class ApiService {
       final rates = await getExchangeRates();
       return rates.convertFromIdr(idrAmount, targetCurrency);
     } catch (e) {
-      print('Error converting currency: $e');
       return idrAmount;
     }
   }
@@ -77,7 +72,6 @@ class ApiService {
       final allMotors = await getMotorBaru();
       return allMotors.where((motor) => motor.brand.toLowerCase() == brand.toLowerCase()).toList();
     } catch (e) {
-      print('Error fetching motors by brand: $e');
       rethrow;
     }
   }
@@ -97,7 +91,6 @@ class ApiService {
         throw Exception('Failed to convert currency');
       }
     } catch (e) {
-      print('Error converting currency: $e');
       // Default rates if API fails
       switch (targetCurrency) {
         case 'IDR': return usdAmount * 15800;
@@ -105,6 +98,46 @@ class ApiService {
         case 'JPY': return usdAmount * 149.5;
         default: return usdAmount;
       }
+    }
+  }
+
+  // Fetch apparel from MockAPI
+  Future<List<Apparel>> getApparel() async {
+    try {
+      
+      final response = await http.get(
+        Uri.parse(apparelApiUrl),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        return jsonData.map((json) => Apparel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load apparel: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Fetch aksesoris from MockAPI
+  Future<List<Aksesoris>> getAksesoris() async {
+    try {
+      
+      final response = await http.get(
+        Uri.parse(aksesorisApiUrl),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        return jsonData.map((json) => Aksesoris.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load aksesoris: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 }

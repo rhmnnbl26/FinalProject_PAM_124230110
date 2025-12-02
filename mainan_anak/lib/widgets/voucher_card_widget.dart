@@ -37,12 +37,12 @@ class VoucherCardWidget extends StatelessWidget {
                 ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.2),
+            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.2),
             width: isSelected ? 3 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -60,7 +60,7 @@ class VoucherCardWidget extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -74,11 +74,11 @@ class VoucherCardWidget extends StatelessWidget {
                       ),
                       const Spacer(),
                       if (voucher.isUsed)
-                        _buildBadge('TERPAKAI', Colors.white.withOpacity(0.3))
+                        _buildBadge('TERPAKAI', Colors.white.withValues(alpha: 0.3))
                       else if (voucher.isExpired)
-                        _buildBadge('KADALUARSA', Colors.white.withOpacity(0.3))
+                        _buildBadge('KADALUARSA', Colors.white.withValues(alpha: 0.3))
                       else if (isExpiringSoon)
-                        _buildBadge('$daysUntilExpiry HARI LAGI', Colors.orange.withOpacity(0.8)),
+                        _buildBadge('$daysUntilExpiry HARI LAGI', Colors.orange.withValues(alpha: 0.8)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -94,7 +94,7 @@ class VoucherCardWidget extends StatelessWidget {
                   Text(
                     voucher.description,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 14,
                     ),
                   ),
@@ -102,10 +102,10 @@ class VoucherCardWidget extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -184,7 +184,7 @@ class VoucherCardWidget extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: 13,
             ),
           ),

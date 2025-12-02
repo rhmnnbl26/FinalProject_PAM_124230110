@@ -25,7 +25,7 @@ class BookingCardWidget extends StatelessWidget {
           color: const Color(0xFF252525),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -82,7 +82,7 @@ class BookingCardWidget extends StatelessWidget {
                         Text(
                           booking.motorPlat,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 14,
                           ),
                         ),
@@ -92,7 +92,7 @@ class BookingCardWidget extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              Divider(color: Colors.white.withOpacity(0.1)),
+              Divider(color: Colors.white.withValues(alpha: 0.1)),
               const SizedBox(height: 16),
               _buildInfoRow(Icons.build, booking.serviceTypeName),
               const SizedBox(height: 8),
@@ -104,7 +104,7 @@ class BookingCardWidget extends StatelessWidget {
                 _buildInfoRow(Icons.note, booking.notes!),
               ],
               const SizedBox(height: 16),
-              Divider(color: Colors.white.withOpacity(0.1)),
+              Divider(color: Colors.white.withValues(alpha: 0.1)),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -115,7 +115,7 @@ class BookingCardWidget extends StatelessWidget {
                       Text(
                         'Total Bayar',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -159,7 +159,7 @@ class BookingCardWidget extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.7), size: 18),
+        Icon(icon, color: Colors.white.withValues(alpha: 0.7), size: 18),
         const SizedBox(width: 12),
         Expanded(
           child: Text(

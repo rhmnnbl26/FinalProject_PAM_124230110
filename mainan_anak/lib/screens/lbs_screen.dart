@@ -24,7 +24,7 @@ class _LbsScreenState extends State<LbsScreen> {
   // Koordinat default: Bengkel Motor Rumah
   static const LatLng _defaultBengkelLocation = LatLng(-7.7482380, 110.4084390);
   
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
 
   @override
   void initState() {

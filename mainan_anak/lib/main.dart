@@ -58,12 +58,10 @@ class MyApp extends StatelessWidget {
         primary: primaryColor,
         secondary: accentBlue,
         surface: bgCard,
-        background: bgDark,
         error: Color(0xFFFF5252),
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: textPrimary,
-        onBackground: textPrimary,
       ),
 
       // App Bar Theme
@@ -88,7 +86,7 @@ class MyApp extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -139,11 +137,11 @@ class MyApp extends StatelessWidget {
         fillColor: bgCard,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -154,7 +152,7 @@ class MyApp extends StatelessWidget {
           borderSide: const BorderSide(color: Color(0xFFFF5252), width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        hintStyle: TextStyle(color: textSecondary.withOpacity(0.6)),
+        hintStyle: TextStyle(color: textSecondary.withValues(alpha: 0.6)),
         labelStyle: const TextStyle(color: textSecondary),
       ),
 
@@ -219,7 +217,7 @@ class MyApp extends StatelessWidget {
 
       // Divider Theme
       dividerTheme: DividerThemeData(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         thickness: 1,
         space: 1,
       ),

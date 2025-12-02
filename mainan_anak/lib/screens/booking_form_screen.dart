@@ -516,10 +516,10 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2196F3).withOpacity(0.2) : const Color(0xFF252525),
+          color: isSelected ? const Color(0xFF2196F3).withValues(alpha: 0.2) : const Color(0xFF252525),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2196F3) : Colors.white.withOpacity(0.1),
+            color: isSelected ? const Color(0xFF2196F3) : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
         ),

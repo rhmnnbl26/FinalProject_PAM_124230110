@@ -34,7 +34,7 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
   Bengkel? _bengkel;
   double? _distance;
   LatLng? _currentPositionLatLng;
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
   bool _isLoading = true;
   bool _hasShaken = false;
   bool _canShake = false;
@@ -186,7 +186,7 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
             height: 250,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             clipBehavior: Clip.antiAlias,
             child: GoogleMap(
@@ -210,7 +210,7 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
             decoration: BoxDecoration(
               color: const Color(0xFF252525),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,9 +237,9 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Row(
+                Row(
                   children: [
-                    const Icon(Icons.access_time, color: Color(0xFF2196F3), size: 20),
+                    Icon(Icons.access_time, color: Color(0xFF2196F3), size: 20),
                     SizedBox(width: 8),
                     Text(
                       'Senin-Sabtu, 08:00-17:00',
@@ -264,14 +264,14 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.check_circle, color: Colors.white70, size: 32),
@@ -306,19 +306,19 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.orange.shade700.withOpacity(0.3),
-                    Colors.orange.shade900.withOpacity(0.2),
+                    Colors.orange.shade700.withValues(alpha: 0.3),
+                    Colors.orange.shade900.withValues(alpha: 0.2),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.2),
+                      color: Colors.orange.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.warning_amber, color: Colors.orange, size: 32),
@@ -361,7 +361,7 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2196F3).withOpacity(0.4),
+                    color: const Color(0xFF2196F3).withValues(alpha: 0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -379,7 +379,7 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -403,7 +403,7 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                           'Kocok HP Anda untuk kesempatan memenangkan diskon hingga 50%!',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                           textAlign: TextAlign.center,
                         ),

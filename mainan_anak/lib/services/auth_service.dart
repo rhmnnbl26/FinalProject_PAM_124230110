@@ -67,7 +67,6 @@ class AuthService {
       await DatabaseHelper.instance.createUser(user);
       return true;
     } catch (e) {
-      print('Register error: $e');
       rethrow;
     }
   }
@@ -90,7 +89,6 @@ class AuthService {
       await saveSession(username);
       return true;
     } catch (e) {
-      print('Login error: $e');
       return false;
     }
   }
@@ -149,7 +147,6 @@ class AuthService {
 
       return true;
     } catch (e) {
-      print('Delete account error: $e');
       return false;
     }
   }

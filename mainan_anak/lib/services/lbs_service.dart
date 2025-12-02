@@ -41,7 +41,6 @@ class LbsService {
         desiredAccuracy: LocationAccuracy.high,
       );
     } catch (e) {
-      print('Error getting current position: $e');
       return null;
     }
   }
@@ -72,7 +71,6 @@ class LbsService {
       // Convert to kilometers
       return distanceInMeters / 1000;
     } catch (e) {
-      print('Error calculating distance: $e');
       return null;
     }
   }
@@ -109,7 +107,6 @@ class LbsService {
             : 'N/A',
       };
     } catch (e) {
-      print('Error getting bengkel with distance: $e');
       return null;
     }
   }

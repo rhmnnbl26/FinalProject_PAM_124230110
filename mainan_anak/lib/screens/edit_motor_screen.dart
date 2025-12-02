@@ -28,7 +28,7 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
   late TextEditingController _kontakController;
 
   late String _kondisi;
-  List<File?> _selectedImages = List.filled(5, null);
+  final List<File?> _selectedImages = List.filled(5, null);
   bool _isLoading = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -379,7 +379,7 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _kondisi,
+                initialValue: _kondisi,
                 decoration: const InputDecoration(
                   labelText: 'Kondisi *',
                   border: OutlineInputBorder(),

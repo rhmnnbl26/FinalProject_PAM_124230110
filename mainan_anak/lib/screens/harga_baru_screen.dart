@@ -83,7 +83,7 @@ class _HargaBaruScreenState extends State<HargaBaruScreen> {
                     Text(
                       'Cek harga motor baru dari berbagai brand ternama',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 14,
                       ),
                     ),
@@ -163,18 +163,18 @@ class _HargaBaruScreenState extends State<HargaBaruScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF2196F3).withOpacity(0.1),
-            const Color(0xFF1565C0).withOpacity(0.05),
+            const Color(0xFF2196F3).withValues(alpha: 0.1),
+            const Color(0xFF1565C0).withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFF2196F3).withOpacity(0.3),
+          color: const Color(0xFF2196F3).withValues(alpha: 0.3),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2196F3).withOpacity(0.2),
+            color: const Color(0xFF2196F3).withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -186,8 +186,27 @@ class _HargaBaruScreenState extends State<HargaBaruScreen> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => MotorListScreen(brand: brand),
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    MotorListScreen(brand: brand),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
+                  
+                  var tween = Tween(begin: begin, end: end).chain(
+                    CurveTween(curve: curve),
+                  );
+                  var offsetAnimation = animation.drive(tween);
+                  
+                  return SlideTransition(
+                    position: offsetAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
               ),
             );
           },
@@ -207,7 +226,7 @@ class _HargaBaruScreenState extends State<HargaBaruScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -220,7 +239,7 @@ class _HargaBaruScreenState extends State<HargaBaruScreen> {
                       return Icon(
                         Icons.motorcycle,
                         size: 80,
-                        color: const Color(0xFF2196F3).withOpacity(0.7),
+                        color: const Color(0xFF2196F3).withValues(alpha: 0.7),
                       );
                     },
                   ),
@@ -248,7 +267,7 @@ class _HargaBaruScreenState extends State<HargaBaruScreen> {
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2196F3).withOpacity(0.4),
+                        color: const Color(0xFF2196F3).withValues(alpha: 0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),

@@ -5,7 +5,7 @@ import 'favorites_screen.dart';
 import 'tambah_motor_screen.dart';
 import 'bengkel_voucher_screen.dart';
 import 'harga_baru_screen.dart';
-import 'profile_screen.dart';
+import 'aksesoris_list_screen.dart';
 
 class HomeNewScreen extends StatefulWidget {
   const HomeNewScreen({super.key});
@@ -140,7 +140,7 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: (banner['gradient'] as List<Color>)[0].withOpacity(0.3),
+                        color: (banner['gradient'] as List<Color>)[0].withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -154,7 +154,7 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
                         child: Icon(
                           banner['icon'] as IconData,
                           size: 150,
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                       Padding(
@@ -177,7 +177,7 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
                               banner['subtitle'] as String,
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                               ),
                             ),
                           ],
@@ -250,11 +250,11 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
         'route': const FavoritesScreen(),
       },
       {
-        'title': 'Profil Saya',
-        'subtitle': 'Pengaturan akun',
-        'icon': Icons.person,
+        'title': 'Beli Aksesoris',
+        'subtitle': 'Apparel & parts',
+        'icon': Icons.shopping_bag,
         'gradient': [Color(0xFF9C27B0), Color(0xFF6A1B9A)],
-        'route': const ProfileScreen(),
+        'route': const AksesorisListScreen(),
       },
     ];
 
@@ -278,7 +278,28 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => item['route'] as Widget),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        item['route'] as Widget,
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      const begin = Offset(0.0, 1.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+                      
+                      var tween = Tween(begin: begin, end: end).chain(
+                        CurveTween(curve: curve),
+                      );
+                      var offsetAnimation = animation.drive(tween);
+                      
+                      return SlideTransition(
+                        position: offsetAnimation,
+                        child: FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             );
@@ -301,19 +322,20 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                gradient[0].withOpacity(0.1),
-                gradient[1].withOpacity(0.05),
+                gradient[0].withValues(alpha: 0.1),
+                gradient[1].withValues(alpha: 0.05),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: gradient[0].withOpacity(0.3),
+              color: gradient[0].withValues(alpha: 0.3),
               width: 1.5,
             ),
           ),
@@ -333,7 +355,7 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: gradient[0].withOpacity(0.3),
+                        color: gradient[0].withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -360,7 +382,7 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
                   subtitle,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
               ],

@@ -168,7 +168,7 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
           boxShadow: [
             BoxShadow(
               color: (isComplete ? Colors.green : const Color(0xFF2196F3))
-                  .withOpacity(0.3),
+                  .withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -202,7 +202,7 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                         ? 'Voucher berhasil didapat!'
                         : 'Goyangkan HP untuk voucher',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 13,
                     ),
                   ),
@@ -213,7 +213,7 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -263,7 +263,7 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                                 : _isShaking
                                     ? Colors.orange
                                     : const Color(0xFF2196F3))
-                            .withOpacity(0.5),
+                            .withValues(alpha: 0.5),
                         blurRadius: 30,
                       ),
                     ],
@@ -301,7 +301,7 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                             : 'Goyangkan HP untuk voucher gratis!',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 14,
                         ),
                       ),
@@ -319,8 +319,8 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(
-                                      0.3 * (1 - _waveAnimation.value),
+                                    color: Colors.white.withValues(
+                                      alpha: 0.3 * (1 - _waveAnimation.value),
                                     ),
                                     width: 2,
                                   ),
@@ -361,7 +361,7 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                         Text(
                           'Lanjutkan! ${100 - percentage}% lagi',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 12,
                             fontStyle: FontStyle.italic,
                           ),
@@ -373,7 +373,7 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                         child: Text(
                           'Tutup',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 14,
                           ),
                         ),
@@ -409,7 +409,7 @@ class _CircularProgressPainter extends CustomPainter {
 
     // Background circle
     final bgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
+      ..color = Colors.white.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 12
       ..strokeCap = StrokeCap.round;
@@ -442,7 +442,7 @@ class _CircularProgressPainter extends CustomPainter {
       final dotY = center.dy + (radius - 6) * math.sin(angle);
 
       final dotPaint = Paint()
-        ..color = Colors.white.withOpacity(1 - animationValue)
+        ..color = Colors.white.withValues(alpha: 1 - animationValue)
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(

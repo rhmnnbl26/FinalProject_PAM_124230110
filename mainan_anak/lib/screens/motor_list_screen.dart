@@ -11,17 +11,29 @@ class MotorListScreen extends StatefulWidget {
   State<MotorListScreen> createState() => _MotorListScreenState();
 }
 
-class _MotorListScreenState extends State<MotorListScreen> {
+class _MotorListScreenState extends State<MotorListScreen>
+    with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   List<MotorBaru> _motors = [];
   bool _isLoading = true;
   String _selectedCurrency = 'USD';
   Map<String, double> _conversionRates = {'USD': 1.0};
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -34,6 +46,7 @@ class _MotorListScreenState extends State<MotorListScreen> {
         _motors = motors;
         _isLoading = false;
       });
+      _animationController.forward();
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -59,7 +72,7 @@ class _MotorListScreenState extends State<MotorListScreen> {
         };
       });
     } catch (e) {
-      print('Error loading conversion rates: $e');
+      // Error handled silently
     }
   }
 
@@ -158,7 +171,7 @@ class _MotorListScreenState extends State<MotorListScreen> {
                           itemCount: _motors.length,
                           itemBuilder: (context, index) {
                             final motor = _motors[index];
-                            return _buildMotorCard(motor);
+                            return _buildMotorCard(motor, index);
                           },
                         ),
                       ),
@@ -168,14 +181,41 @@ class _MotorListScreenState extends State<MotorListScreen> {
     );
   }
 
-  Widget _buildMotorCard(MotorBaru motor) {
+  Widget _buildMotorCard(MotorBaru motor, int index) {
     final convertedPrice = _convertPrice(motor.priceUsd);
     
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
+    // Staggered animation
+    final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          (index / _motors.length) * 0.5,
+          ((index + 1) / _motors.length) * 0.5 + 0.5,
+          curve: Curves.easeOut,
+        ),
+      ),
+    );
+    
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, 50 * (1 - animation.value)),
+          child: Opacity(
+            opacity: animation.value,
+            child: child,
+          ),
+        );
+      },
+      child: Hero(
+        tag: 'motor_${motor.id}',
+        child: Material(
+          type: MaterialType.transparency,
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (motor.images.isNotEmpty)
@@ -263,7 +303,7 @@ class _MotorListScreenState extends State<MotorListScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2196F3).withOpacity(0.1),
+                    color: const Color(0xFF2196F3).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -288,6 +328,9 @@ class _MotorListScreenState extends State<MotorListScreen> {
             ),
           ),
         ],
+      ),
+          ),
+        ),
       ),
     );
   }
