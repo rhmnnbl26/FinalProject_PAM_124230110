@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'home_new_screen.dart';
 import 'tambah_motor_screen.dart';
-import 'harga_baru_screen.dart';
+import 'bengkel_voucher_screen.dart';
 import 'profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -15,9 +15,9 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
+    const HomeNewScreen(),
     const TambahMotorScreen(),
-    const HargaBaruScreen(),
+    const BengkelVoucherScreen(),
     const ProfileScreen(),
   ];
 
@@ -35,19 +35,19 @@ class _MainNavigationState extends State<MainNavigation> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_rounded),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle),
-            label: 'Tambah Motor',
+            icon: Icon(Icons.add_circle_outline),
+            label: 'Jual Motor',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.motorcycle),
-            label: 'Harga Baru',
+            icon: Icon(Icons.build_circle_outlined),
+            label: 'Motor Care',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person_outline),
             label: 'Profil',
           ),
         ],

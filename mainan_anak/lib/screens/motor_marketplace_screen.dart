@@ -5,14 +5,14 @@ import '../services/database_helper.dart';
 import '../services/lbs_service.dart';
 import 'detail_motor_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class MotorMarketplaceScreen extends StatefulWidget {
+  const MotorMarketplaceScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<MotorMarketplaceScreen> createState() => _MotorMarketplaceScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with SingleTickerProviderStateMixin {
   List<MotorListing> _motors = [];
   List<MotorListing> _filteredMotors = [];
   bool _isLoading = true;
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: const Color(0xFFFF5252),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -143,7 +143,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         break;
       case 'newest':
       default:
-        // Keep current order (newest first from database)
         break;
     }
     
@@ -155,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFF1E1E1E),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -209,9 +208,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       floating: true,
       snap: true,
       elevation: 0,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFF121212),
       title: const Text(
-        'Children\'s Toys',
+        'Motor Marketplace',
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
@@ -311,38 +310,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: [
-            _buildSortChip(
-              'Newest',
-              _sortBy == 'newest',
-              () => setState(() {
-                _sortBy = 'newest';
-                _applyFiltersAndSort();
-              }),
-            ),
-            _buildSortChip(
-              'Price: Low',
-              _sortBy == 'price_low',
-              () => setState(() {
-                _sortBy = 'price_low';
-                _applyFiltersAndSort();
-              }),
-            ),
-            _buildSortChip(
-              'Price: High',
-              _sortBy == 'price_high',
-              () => setState(() {
-                _sortBy = 'price_high';
-                _applyFiltersAndSort();
-              }),
-            ),
-            _buildSortChip(
-              'Nearest',
-              _sortBy == 'distance',
-              () => setState(() {
-                _sortBy = 'distance';
-                _applyFiltersAndSort();
-              }),
-            ),
+            _buildSortChip('Newest', _sortBy == 'newest', () => setState(() {
+              _sortBy = 'newest';
+              _applyFiltersAndSort();
+            })),
+            _buildSortChip('Price: Low', _sortBy == 'price_low', () => setState(() {
+              _sortBy = 'price_low';
+              _applyFiltersAndSort();
+            })),
+            _buildSortChip('Price: High', _sortBy == 'price_high', () => setState(() {
+              _sortBy = 'price_high';
+              _applyFiltersAndSort();
+            })),
+            _buildSortChip('Nearest', _sortBy == 'distance', () => setState(() {
+              _sortBy = 'distance';
+              _applyFiltersAndSort();
+            })),
           ],
         ),
       ),
@@ -356,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         label: Text(label),
         selected: selected,
         onSelected: (_) => onTap(),
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: const Color(0xFF1E1E1E),
         selectedColor: const Color(0xFF2196F3),
         labelStyle: TextStyle(
           color: selected ? Colors.white : Colors.grey[400],
@@ -384,19 +367,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.motorcycle_outlined,
-                size: 80,
-                color: Colors.grey[700],
-              ),
+              Icon(Icons.motorcycle_outlined, size: 80, color: Colors.grey[700]),
               const SizedBox(height: 16),
               Text(
                 'No motorcycles found',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey[400],
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 18, color: Colors.grey[400], fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
               TextButton(
@@ -424,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final motor = _filteredMotors[index];
-            return _buildPremiumMotorCard(motor, index);
+            return _buildMotorCard(motor, index);
           },
           childCount: _filteredMotors.length,
         ),
@@ -432,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildPremiumMotorCard(MotorListing motor, int index) {
+  Widget _buildMotorCard(MotorListing motor, int index) {
     final distance = motor.id != null ? _motorDistances[motor.id] : null;
     
     return TweenAnimationBuilder(
@@ -450,12 +425,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF252525),
+          color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
         ),
         child: Material(
           color: Colors.transparent,
@@ -463,9 +435,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             onTap: () async {
               await Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => DetailMotorScreen(motorId: motor.id!),
-                ),
+                MaterialPageRoute(builder: (_) => DetailMotorScreen(motorId: motor.id!)),
               );
               _loadMotors();
             },
@@ -475,7 +445,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image
                   Hero(
                     tag: 'motor_${motor.id}',
                     child: ClipRRect(
@@ -492,17 +461,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Content
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Brand badge
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: const Color(0xFF2196F3).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(6),
@@ -517,7 +481,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           ),
                         ),
                         const SizedBox(height: 8),
-                        // Name
                         Text(
                           motor.nama,
                           style: const TextStyle(
@@ -530,60 +493,30 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
-                        // Specs
                         Row(
                           children: [
-                            Icon(
-                              Icons.speed,
-                              size: 14,
-                              color: Colors.grey[500],
-                            ),
+                            Icon(Icons.speed, size: 14, color: Colors.grey[500]),
                             const SizedBox(width: 4),
-                            Text(
-                              '${motor.cc}cc',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[400],
-                              ),
-                            ),
+                            Text('${motor.cc}cc', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
                             const SizedBox(width: 12),
-                            Icon(
-                              Icons.calendar_today,
-                              size: 14,
-                              color: Colors.grey[500],
-                            ),
+                            Icon(Icons.calendar_today, size: 14, color: Colors.grey[500]),
                             const SizedBox(width: 4),
-                            Text(
-                              '${motor.tahun}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[400],
-                              ),
-                            ),
+                            Text('${motor.tahun}', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        // Distance (if available)
                         if (distance != null)
                           Row(
                             children: [
-                              Icon(
-                                Icons.location_on,
-                                size: 14,
-                                color: Colors.grey[500],
-                              ),
+                              Icon(Icons.location_on, size: 14, color: Colors.grey[500]),
                               const SizedBox(width: 4),
                               Text(
                                 _lbsService.formatDistance(distance),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[400],
-                                ),
+                                style: TextStyle(fontSize: 12, color: Colors.grey[400]),
                               ),
                             ],
                           ),
                         const SizedBox(height: 12),
-                        // Price
                         Text(
                           'Rp ${_formatPrice(motor.hargaIdr)}',
                           style: const TextStyle(
@@ -609,14 +542,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       width: 110,
       height: 110,
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: const Color(0xFF121212),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(
-        Icons.motorcycle,
-        size: 50,
-        color: Colors.grey[700],
-      ),
+      child: Icon(Icons.motorcycle, size: 50, color: Colors.grey[700]),
     );
   }
 
@@ -688,11 +617,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
             children: [
               const Text(
                 'Filters',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               TextButton(
                 onPressed: widget.onReset,
@@ -701,8 +626,6 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
             ],
           ),
           const SizedBox(height: 24),
-          
-          // Brand Filter
           const Text('Brand', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Wrap(
@@ -713,21 +636,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               return FilterChip(
                 label: Text(brand),
                 selected: selected,
-                onSelected: (value) {
-                  setState(() => _brand = value ? brand : null);
-                },
-                backgroundColor: const Color(0xFF1A1A1A),
+                onSelected: (value) => setState(() => _brand = value ? brand : null),
+                backgroundColor: const Color(0xFF121212),
                 selectedColor: const Color(0xFF2196F3),
-                labelStyle: TextStyle(
-                  color: selected ? Colors.white : Colors.grey[400],
-                ),
+                labelStyle: TextStyle(color: selected ? Colors.white : Colors.grey[400]),
               );
             }).toList(),
           ),
-          
           const SizedBox(height: 24),
-          
-          // CC Filter
           const Text('Engine CC', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Wrap(
@@ -738,21 +654,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               return FilterChip(
                 label: Text('${cc}cc'),
                 selected: selected,
-                onSelected: (value) {
-                  setState(() => _cc = value ? cc : null);
-                },
-                backgroundColor: const Color(0xFF1A1A1A),
+                onSelected: (value) => setState(() => _cc = value ? cc : null),
+                backgroundColor: const Color(0xFF121212),
                 selectedColor: const Color(0xFF2196F3),
-                labelStyle: TextStyle(
-                  color: selected ? Colors.white : Colors.grey[400],
-                ),
+                labelStyle: TextStyle(color: selected ? Colors.white : Colors.grey[400]),
               );
             }).toList(),
           ),
-          
           const SizedBox(height: 24),
-          
-          // Kondisi Filter
           const Text('Condition', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Row(
@@ -761,10 +670,8 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                 child: FilterChip(
                   label: const Text('New'),
                   selected: _kondisi == 'baru',
-                  onSelected: (value) {
-                    setState(() => _kondisi = value ? 'baru' : null);
-                  },
-                  backgroundColor: const Color(0xFF1A1A1A),
+                  onSelected: (value) => setState(() => _kondisi = value ? 'baru' : null),
+                  backgroundColor: const Color(0xFF121212),
                   selectedColor: const Color(0xFF2196F3),
                 ),
               ),
@@ -773,19 +680,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                 child: FilterChip(
                   label: const Text('Used'),
                   selected: _kondisi == 'bekas',
-                  onSelected: (value) {
-                    setState(() => _kondisi = value ? 'bekas' : null);
-                  },
-                  backgroundColor: const Color(0xFF1A1A1A),
+                  onSelected: (value) => setState(() => _kondisi = value ? 'bekas' : null),
+                  backgroundColor: const Color(0xFF121212),
                   selectedColor: const Color(0xFF2196F3),
                 ),
               ),
             ],
           ),
-          
           const SizedBox(height: 24),
-          
-          // Distance Filter
           const Text('Max Distance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Wrap(
@@ -795,26 +697,17 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               return FilterChip(
                 label: Text('${distance.toInt()}km'),
                 selected: selected,
-                onSelected: (value) {
-                  setState(() => _maxDistance = value ? distance : null);
-                },
-                backgroundColor: const Color(0xFF1A1A1A),
+                onSelected: (value) => setState(() => _maxDistance = value ? distance : null),
+                backgroundColor: const Color(0xFF121212),
                 selectedColor: const Color(0xFF2196F3),
-                labelStyle: TextStyle(
-                  color: selected ? Colors.white : Colors.grey[400],
-                ),
+                labelStyle: TextStyle(color: selected ? Colors.white : Colors.grey[400]),
               );
             }).toList(),
           ),
-          
           const SizedBox(height: 32),
-          
-          // Apply Button
           ElevatedButton(
             onPressed: () => widget.onApply(_brand, _cc, _kondisi, _maxDistance),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
+            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
             child: const Text('Apply Filters'),
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom),
@@ -823,4 +716,3 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
     );
   }
 }
-

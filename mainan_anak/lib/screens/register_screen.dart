@@ -30,37 +30,61 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Validate password strength
+    final passwordError = _authService.validatePassword(_passwordController.text);
+    if (passwordError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(passwordError),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
-    final success = await _authService.register(
-      _usernameController.text.trim(),
-      _passwordController.text,
-    );
-
-    if (!mounted) return;
-    
-    setState(() => _isLoading = false);
-
-    if (success) {
-      // Auto login after successful registration
-      await _authService.login(
+    try {
+      final success = await _authService.register(
         _usernameController.text.trim(),
         _passwordController.text,
       );
 
       if (!mounted) return;
+      
+      setState(() => _isLoading = false);
 
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainNavigation()),
-        (route) => false,
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Username sudah digunakan'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (success) {
+        // Auto login after successful registration
+        await _authService.login(
+          _usernameController.text.trim(),
+          _passwordController.text,
+        );
+
+        if (!mounted) return;
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainNavigation()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Username sudah digunakan'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -117,6 +141,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Password',
+                      hintText: 'Min. 6 karakter, huruf & angka',
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
@@ -126,6 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               : Icons.visibility,
                         ),
                         onPressed: () {
+                          if (!mounted) return;
                           setState(() => _obscurePassword = !_obscurePassword);
                         },
                       ),
@@ -134,10 +160,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Password tidak boleh kosong';
                       }
-                      if (value.length < 6) {
-                        return 'Password minimal 6 karakter';
-                      }
-                      return null;
+                      final error = _authService.validatePassword(value);
+                      return error;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -155,6 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               : Icons.visibility,
                         ),
                         onPressed: () {
+                          if (!mounted) return;
                           setState(
                               () => _obscureConfirmPassword = !_obscureConfirmPassword);
                         },

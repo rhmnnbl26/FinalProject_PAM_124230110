@@ -263,7 +263,7 @@ class _MotorListScreenState extends State<MotorListScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green[50],
+                    color: const Color(0xFF2196F3).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -278,7 +278,7 @@ class _MotorListScreenState extends State<MotorListScreen> {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: Color(0xFF2196F3),
                         ),
                       ),
                     ],
@@ -292,3 +292,4 @@ class _MotorListScreenState extends State<MotorListScreen> {
     );
   }
 }
+

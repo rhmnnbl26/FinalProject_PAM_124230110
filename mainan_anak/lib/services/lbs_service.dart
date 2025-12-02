@@ -113,4 +113,54 @@ class LbsService {
       return null;
     }
   }
+
+  // Calculate distance between two coordinates
+  double calculateDistance(
+    double startLat,
+    double startLng,
+    double endLat,
+    double endLng,
+  ) {
+    final distanceInMeters = Geolocator.distanceBetween(
+      startLat,
+      startLng,
+      endLat,
+      endLng,
+    );
+    return distanceInMeters / 1000; // Convert to km
+  }
+
+  // Calculate distance from current position to motor location
+  Future<double?> calculateDistanceToMotor(double? motorLat, double? motorLng) async {
+    if (motorLat == null || motorLng == null) return null;
+
+    try {
+      final currentPosition = await getCurrentPosition();
+      if (currentPosition == null) return null;
+
+      return calculateDistance(
+        currentPosition.latitude,
+        currentPosition.longitude,
+        motorLat,
+        motorLng,
+      );
+    } catch (e) {
+      print('Error calculating distance to motor: $e');
+      return null;
+    }
+  }
+
+  // Format distance to readable string
+  String formatDistance(double? distanceKm) {
+    if (distanceKm == null) return 'Lokasi tidak tersedia';
+    
+    if (distanceKm < 1) {
+      return '${(distanceKm * 1000).toStringAsFixed(0)} m';
+    } else if (distanceKm < 10) {
+      return '${distanceKm.toStringAsFixed(2)} km';
+    } else {
+      return '${distanceKm.toStringAsFixed(1)} km';
+    }
+  }
 }
+

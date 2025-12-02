@@ -257,7 +257,7 @@ class _LbsScreenState extends State<LbsScreen> {
             Icon(
               Icons.error_outline,
               size: 100,
-              color: Colors.red[300],
+              color: Colors.orange[300],
             ),
             const SizedBox(height: 24),
             Text(
@@ -454,3 +454,4 @@ class _LbsScreenState extends State<LbsScreen> {
     );
   }
 }
+

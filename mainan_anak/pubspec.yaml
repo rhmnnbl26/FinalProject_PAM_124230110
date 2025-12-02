@@ -51,15 +51,21 @@ dependencies:
   
   # Image Handling
   image_picker: ^1.0.4
+  flutter_image_compress: ^2.1.0
   
   # Notifications
   flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.2
   
   # Utilities
   intl: ^0.19.0
   crypto: ^3.0.3
   url_launcher: ^6.2.1
   google_maps_flutter: ^2.5.0
+  
+  # Sensors & QR
+  sensors_plus: ^6.0.1
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:

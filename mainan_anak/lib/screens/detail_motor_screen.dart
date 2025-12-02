@@ -5,7 +5,10 @@ import '../models/motor_listing.dart';
 import '../models/exchange_rate.dart';
 import '../services/database_helper.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
+import '../services/lbs_service.dart';
 import '../utils/currency_helper.dart';
+import 'edit_motor_screen.dart';
 
 class DetailMotorScreen extends StatefulWidget {
   final int motorId;
@@ -18,29 +21,68 @@ class DetailMotorScreen extends StatefulWidget {
 
 class _DetailMotorScreenState extends State<DetailMotorScreen> {
   final ApiService _apiService = ApiService();
+  final AuthService _authService = AuthService();
+  final LbsService _lbsService = LbsService();
   MotorListing? _motor;
   ExchangeRate? _exchangeRate;
   bool _isLoading = true;
+  bool _isFavorite = false;
+  int? _currentUserId;
   int _currentPhotoIndex = 0;
   String _selectedCurrency = 'IDR';
+  double? _distanceToMotor;
 
   @override
   void initState() {
     super.initState();
     _loadMotorDetail();
+    _loadCurrentUser();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final userId = await _authService.getCurrentUserId();
+    if (!mounted) return;
+    setState(() {
+      _currentUserId = userId;
+    });
+    if (userId != null) {
+      _checkFavorite(userId);
+    }
+  }
+
+  Future<void> _checkFavorite(int userId) async {
+    final isFav = await DatabaseHelper.instance.isFavorite(userId, widget.motorId);
+    if (!mounted) return;
+    setState(() {
+      _isFavorite = isFav;
+    });
   }
 
   Future<void> _loadMotorDetail() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     try {
       final motor = await DatabaseHelper.instance.getMotorListingById(widget.motorId);
       final rates = await _apiService.getExchangeRates();
+      
+      // Calculate distance if motor has location
+      double? distance;
+      if (motor?.latitude != null && motor?.longitude != null) {
+        distance = await _lbsService.calculateDistanceToMotor(
+          motor!.latitude,
+          motor.longitude,
+        );
+      }
+      
+      if (!mounted) return;
       setState(() {
         _motor = motor;
         _exchangeRate = rates;
+        _distanceToMotor = distance;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -80,15 +122,144 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
     }
   }
 
+  Future<void> _openInGoogleMaps() async {
+    if (_motor == null || _motor!.latitude == null || _motor!.longitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lokasi motor tidak tersedia')),
+      );
+      return;
+    }
+
+    try {
+      final url = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=${_motor!.latitude},${_motor!.longitude}'
+      );
+      
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error membuka Google Maps: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (_currentUserId == null) return;
+
+    try {
+      if (_isFavorite) {
+        await DatabaseHelper.instance.removeFavorite(_currentUserId!, widget.motorId);
+      } else {
+        await DatabaseHelper.instance.addFavorite(_currentUserId!, widget.motorId);
+      }
+      if (!mounted) return;
+      setState(() {
+        _isFavorite = !_isFavorite;
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isFavorite ? 'Ditambahkan ke favorit' : 'Dihapus dari favorit'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  Future<void> _editMotor() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditMotorScreen(motor: _motor!),
+      ),
+    );
+
+    if (result == true) {
+      _loadMotorDetail(); // Reload data
+    }
+  }
+
+  Future<void> _deleteMotor() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Motor'),
+        content: const Text('Apakah Anda yakin ingin menghapus motor ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await DatabaseHelper.instance.deleteMotorListing(widget.motorId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Motor berhasil dihapus'),
+              backgroundColor: Color(0xFF2196F3),
+            ),
+          );
+          Navigator.pop(context, true); // Return to previous screen
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error menghapus motor: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool isOwner = _currentUserId != null && 
+                          _motor?.userId != null && 
+                          _currentUserId == _motor!.userId;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Motor'),
         actions: [
+          if (_currentUserId != null && !isOwner)
+            IconButton(
+              icon: Icon(_isFavorite ? Icons.favorite : Icons.favorite_border),
+              onPressed: _toggleFavorite,
+              color: _isFavorite ? Colors.red : null,
+            ),
+          if (isOwner) ...[
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: _editMotor,
+              tooltip: 'Edit',
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _deleteMotor,
+              tooltip: 'Hapus',
+              color: Colors.red,
+            ),
+          ],
           PopupMenuButton<String>(
             initialValue: _selectedCurrency,
             onSelected: (value) {
+              if (!mounted) return;
               setState(() => _selectedCurrency = value);
             },
             itemBuilder: (context) => [
@@ -146,6 +317,21 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
                             _buildDescriptionCard(),
                             const SizedBox(height: 16),
                             _buildLocationCard(),
+                            if (_motor!.latitude != null && _motor!.longitude != null) ...[
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: OutlinedButton.icon(
+                                  onPressed: _openInGoogleMaps,
+                                  icon: const Icon(Icons.map),
+                                  label: const Text('Lihat Lokasi di Google Maps'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.blue,
+                                  ),
+                                ),
+                              ),
+                            ],
                             if (_motor!.kontakOpsional != null &&
                                 _motor!.kontakOpsional!.isNotEmpty) ...[
                               const SizedBox(height: 16),
@@ -160,7 +346,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
                                 icon: const Icon(Icons.shopping_cart),
                                 label: const Text('Beli via Instagram'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple,
+                                  backgroundColor: const Color(0xFF2196F3),
                                   foregroundColor: Colors.white,
                                 ),
                               ),
@@ -194,6 +380,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
           child: PageView.builder(
             itemCount: photos.length,
             onPageChanged: (index) {
+              if (!mounted) return;
               setState(() => _currentPhotoIndex = index);
             },
             itemBuilder: (context, index) {
@@ -254,7 +441,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.green,
+                color: Color(0xFF2196F3),
               ),
             ),
           ],
@@ -326,18 +513,44 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
   }
 
   Widget _buildLocationCard() {
+    final distanceText = _lbsService.formatDistance(_distanceToMotor);
+    
     return Card(
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.location_on, color: Colors.red),
-            const SizedBox(width: 8),
-            Text(
-              _motor!.lokasi,
-              style: const TextStyle(fontSize: 14),
+            Row(
+              children: [
+                const Icon(Icons.location_on, color: Colors.red),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _motor!.lokasi,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
             ),
+            if (_motor!.latitude != null && _motor!.longitude != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.navigation, size: 16, color: Colors.blue[600]),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Jarak: $distanceText dari lokasi Anda',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -363,3 +576,4 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> {
     );
   }
 }
+

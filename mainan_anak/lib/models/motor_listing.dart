@@ -9,6 +9,8 @@ class MotorListing {
   final String kondisi; // 'baru' atau 'bekas'
   final String deskripsi;
   final String lokasi;
+  final double? latitude;
+  final double? longitude;
   final String? fotoPath1;
   final String? fotoPath2;
   final String? fotoPath3;
@@ -16,6 +18,7 @@ class MotorListing {
   final String? fotoPath5;
   final String instagramLink;
   final String? kontakOpsional;
+  final int? userId; // Pemilik motor
 
   MotorListing({
     this.id,
@@ -28,6 +31,8 @@ class MotorListing {
     required this.kondisi,
     required this.deskripsi,
     required this.lokasi,
+    this.latitude,
+    this.longitude,
     this.fotoPath1,
     this.fotoPath2,
     this.fotoPath3,
@@ -35,6 +40,7 @@ class MotorListing {
     this.fotoPath5,
     required this.instagramLink,
     this.kontakOpsional,
+    this.userId,
   });
 
   Map<String, dynamic> toMap() {
@@ -49,6 +55,8 @@ class MotorListing {
       'kondisi': kondisi,
       'deskripsi': deskripsi,
       'lokasi': lokasi,
+      'latitude': latitude,
+      'longitude': longitude,
       'foto_path_1': fotoPath1,
       'foto_path_2': fotoPath2,
       'foto_path_3': fotoPath3,
@@ -56,6 +64,7 @@ class MotorListing {
       'foto_path_5': fotoPath5,
       'instagram_link': instagramLink,
       'kontak_opsional': kontakOpsional,
+      'user_id': userId,
     };
   }
 
@@ -71,6 +80,8 @@ class MotorListing {
       kondisi: map['kondisi'] as String,
       deskripsi: map['deskripsi'] as String,
       lokasi: map['lokasi'] as String,
+      latitude: map['latitude'] != null ? (map['latitude'] as num).toDouble() : null,
+      longitude: map['longitude'] != null ? (map['longitude'] as num).toDouble() : null,
       fotoPath1: map['foto_path_1'] as String?,
       fotoPath2: map['foto_path_2'] as String?,
       fotoPath3: map['foto_path_3'] as String?,
@@ -78,6 +89,7 @@ class MotorListing {
       fotoPath5: map['foto_path_5'] as String?,
       instagramLink: map['instagram_link'] as String,
       kontakOpsional: map['kontak_opsional'] as String?,
+      userId: map['user_id'] as int?,
     );
   }
 
