@@ -649,28 +649,83 @@ class DatabaseHelper {
   Future<String> generateBookingCode() async {
     final now = DateTime.now();
     final dateCode = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final targetDate = now.toIso8601String().split('T')[0];
     
     final db = await instance.database;
-    final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM bookings WHERE booking_date = ?',
-      [now.toIso8601String().split('T')[0]],
-    );
-    final count = result.first['count'] as int;
-    final sequence = (count + 1).toString().padLeft(3, '0');
     
-    return 'BOOK-$dateCode-$sequence';
+    // Use transaction to prevent race condition
+    return await db.transaction((txn) async {
+      // Query with LIKE to match date format stored in database
+      final result = await txn.rawQuery(
+        'SELECT COUNT(*) as count FROM bookings WHERE booking_date LIKE ?',
+        ['$targetDate%'],
+      );
+      final count = result.first['count'] as int;
+      
+      // Keep generating until we find a unique code
+      String bookingCode;
+      int sequence = count + 1;
+      bool isUnique = false;
+      
+      while (!isUnique) {
+        bookingCode = 'BOOK-$dateCode-${sequence.toString().padLeft(3, '0')}';
+        
+        // Check if this code already exists
+        final existingResult = await txn.rawQuery(
+          'SELECT COUNT(*) as count FROM bookings WHERE booking_code = ?',
+          [bookingCode],
+        );
+        final existingCount = existingResult.first['count'] as int;
+        
+        if (existingCount == 0) {
+          isUnique = true;
+          return bookingCode;
+        }
+        
+        sequence++; // Try next sequence number
+      }
+      
+      return 'BOOK-$dateCode-${sequence.toString().padLeft(3, '0')}';
+    });
   }
 
   Future<String> generateQueueNumber(String bookingDate) async {
     final db = await instance.database;
-    final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM bookings WHERE booking_date = ?',
-      [bookingDate],
-    );
-    final count = result.first['count'] as int;
-    final sequence = (count + 1).toString().padLeft(3, '0');
     
-    return 'A$sequence';
+    // Use transaction to prevent race condition
+    return await db.transaction((txn) async {
+      // Query with LIKE to match date format stored in database
+      final result = await txn.rawQuery(
+        'SELECT COUNT(*) as count FROM bookings WHERE booking_date LIKE ?',
+        ['$bookingDate%'],
+      );
+      final count = result.first['count'] as int;
+      
+      // Keep generating until we find a unique queue number for this date
+      String queueNumber;
+      int sequence = count + 1;
+      bool isUnique = false;
+      
+      while (!isUnique) {
+        queueNumber = 'A${sequence.toString().padLeft(3, '0')}';
+        
+        // Check if this queue number already exists for this date
+        final existingResult = await txn.rawQuery(
+          'SELECT COUNT(*) as count FROM bookings WHERE booking_date LIKE ? AND queue_number = ?',
+          ['$bookingDate%', queueNumber],
+        );
+        final existingCount = existingResult.first['count'] as int;
+        
+        if (existingCount == 0) {
+          isUnique = true;
+          return queueNumber;
+        }
+        
+        sequence++; // Try next sequence number
+      }
+      
+      return 'A${sequence.toString().padLeft(3, '0')}';
+    });
   }
 
   // Booking Slot operations
