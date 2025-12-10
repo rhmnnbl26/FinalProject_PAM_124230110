@@ -6,17 +6,15 @@ class BookingCardWidget extends StatelessWidget {
   final Booking booking;
   final VoidCallback? onTap;
 
-  const BookingCardWidget({
-    super.key,
-    required this.booking,
-    this.onTap,
-  });
+  const BookingCardWidget({super.key, required this.booking, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
-    final formattedDate = dateFormat.format(DateTime.parse(booking.bookingDate));
-    
+    final formattedDate = dateFormat.format(
+      DateTime.parse(booking.bookingDate),
+    );
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -37,7 +35,10 @@ class BookingCardWidget extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(booking.status),
                       borderRadius: BorderRadius.circular(20),
@@ -65,7 +66,11 @@ class BookingCardWidget extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Icon(Icons.motorcycle, color: Color(0xFF2196F3), size: 24),
+                  const Icon(
+                    Icons.motorcycle,
+                    color: Color(0xFF2196F3),
+                    size: 24,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -143,7 +148,10 @@ class BookingCardWidget extends StatelessWidget {
                     onPressed: onTap,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2196F3),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                     child: const Text('Lihat Detail'),
                   ),

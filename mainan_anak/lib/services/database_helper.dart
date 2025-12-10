@@ -5,58 +5,31 @@ import '../models/motor_listing.dart';
 import '../models/bengkel.dart';
 import '../models/voucher.dart';
 
-/// ============================================================================
-/// DATABASE HELPER - SQLITE LOCAL DATABASE MANAGEMENT
-/// ============================================================================
-/// File ini adalah CORE untuk semua operasi database lokal.
-/// 
-/// PENTING UNTUK PRESENTASI:
-/// - Menggunakan SQLITE (local database - materi wajib!)
-/// - Ada 8 TABEL berbeda untuk berbagai fitur
-/// - FULL CRUD operations (Create, Read, Update, Delete)
-/// - Relational database dengan foreign keys
-/// 
-/// TEKNOLOGI:
-/// - sqflite: ^2.3.0 untuk SQLite database
-/// - path: untuk database file path
-/// - Singleton pattern untuk instance management
-/// ============================================================================
-
 class DatabaseHelper {
-  /// Singleton pattern: hanya ada 1 instance DatabaseHelper di seluruh app
-  /// PRESENTASI: Ini best practice untuk database management
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
 
-  DatabaseHelper._init(); // Private constructor
+  DatabaseHelper._init();
 
-  /// Get database instance (lazy initialization)
-  /// Jika belum ada → create baru, jika sudah ada → return yang lama
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('mainan_anak.db'); // Database filename
+    _database = await _initDB('mainan_anak.db');
     return _database!;
   }
 
-  /// Initialize database
-  /// FLOW: Get database path → Open/create database → Set version
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath(); // Android: /data/data/.../databases/
-    final path = join(dbPath, filePath);      // Full path: .../mainan_anak.db
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
 
     return await openDatabase(
       path,
-      version: 4, // Database version (untuk migration/upgrade)
-      onCreate: _createDB,     // Callback saat create database baru
-      onUpgrade: _upgradeDB,   // Callback saat upgrade version
+      version: 4,
+      onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
-  // ========== CREATE DATABASE TABLES ==========
-  /// Dipanggil HANYA sekali saat database pertama kali dibuat
-  /// PRESENTASI: Jelaskan struktur 8 tabel yang ada
   Future<void> _createDB(Database db, int version) async {
-    // SQL data types (constants untuk consistency)
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
     const intType = 'INTEGER NOT NULL';
@@ -65,132 +38,105 @@ class DatabaseHelper {
     const realTypeNull = 'REAL';
     const intTypeNull = 'INTEGER';
 
-    // ========== TABEL #1: USERS ==========
-    /// Menyimpan data user (username, hashed password, salt)
-    /// PRESENTASI: Ini untuk autentikasi (register & login)
     await db.execute('''
       CREATE TABLE users (
         id $idType,
-        username $textType UNIQUE,    -- UNIQUE: tidak boleh duplicate
-        password_hash $textType,      -- SHA-256 hashed password
-        salt $textType                -- Unique salt per user
+        username $textType UNIQUE,
+        password_hash $textType,
+        salt $textType
       )
     ''');
 
-    // ========== TABEL #2: MOTOR LISTING (MAIN CRUD) ==========
-    /// ⭐ INI ADALAH TABEL UTAMA UNTUK CRUD OPERATIONS ⭐
-    /// Menyimpan iklan motor bekas yang dijual oleh user
-    /// 
-    /// FITUR:
-    /// - Multiple photos (5 foto)
-    /// - Geolocation (latitude, longitude)
-    /// - User ownership (foreign key ke users)
-    /// - Instagram link untuk contact seller
     await db.execute('''
       CREATE TABLE motor_listing (
         id $idType,
-        nama $textType,               -- Nama motor (contoh: "Honda CBR 250RR")
-        brand $textType,              -- Brand (Honda, Yamaha, Kawasaki, dll)
-        cc $intType,                  -- Kapasitas mesin (contoh: 250)
-        tahun $intType,               -- Tahun produksi (contoh: 2020)
-        harga_idr $realType,          -- Harga dalam Rupiah
-        kilometer $intType,           -- Jarak tempuh (contoh: 5000 km)
-        kondisi $textType,            -- 'baru' atau 'bekas'
-        deskripsi $textType,          -- Deskripsi lengkap motor
-        lokasi $textType,             -- Lokasi (contoh: "Jakarta Selatan")
-        latitude $realTypeNull,       -- GPS latitude (untuk LBS)
-        longitude $realTypeNull,      -- GPS longitude (untuk LBS)
-        foto_path_1 $textTypeNull,    -- Path foto 1 (local storage)
-        foto_path_2 $textTypeNull,    -- Path foto 2
-        foto_path_3 $textTypeNull,    -- Path foto 3
-        foto_path_4 $textTypeNull,    -- Path foto 4
-        foto_path_5 $textTypeNull,    -- Path foto 5
-        instagram_link $textType,     -- Link Instagram seller
-        kontak_opsional $textTypeNull, -- Kontak tambahan (WhatsApp, dll)
-        user_id $intTypeNull          -- Foreign key: pemilik motor (relasi ke users)
+        nama $textType,
+        brand $textType,
+        cc $intType,
+        tahun $intType,
+        harga_idr $realType,
+        kilometer $intType,
+        kondisi $textType,
+        deskripsi $textType,
+        lokasi $textType,
+        latitude $realTypeNull,
+        longitude $realTypeNull,
+        foto_path_1 $textTypeNull,
+        foto_path_2 $textTypeNull,
+        foto_path_3 $textTypeNull,
+        foto_path_4 $textTypeNull,
+        foto_path_5 $textTypeNull,
+        instagram_link $textType,
+        kontak_opsional $textTypeNull,
+        user_id $intTypeNull
       )
     ''');
 
-    // ========== TABEL #3: BENGKEL ==========
-    /// Data bengkel untuk booking service motor
-    /// PRESENTASI: Digunakan untuk LBS (Location-Based Service)
     await db.execute('''
       CREATE TABLE bengkel (
         id $idType,
         nama $textType,
-        latitude $realType,           -- GPS latitude bengkel
-        longitude $realType           -- GPS longitude bengkel
+        latitude $realType,
+        longitude $realType
       )
     ''');
 
-    // ========== TABEL #4: FAVORITES (WISHLIST) ==========
-    /// Menyimpan motor favorit per user
-    /// PRESENTASI: Relasi Many-to-Many (user ↔ motor)
     await db.execute('''
       CREATE TABLE favorites (
         id $idType,
-        user_id $intType,             -- Foreign key ke users
-        motor_id $intType,            -- Foreign key ke motor_listing
-        created_at $textType,         -- Timestamp
-        UNIQUE(user_id, motor_id)     -- Prevent duplicate favorite
+        user_id $intType,
+        motor_id $intType,
+        created_at $textType,
+        UNIQUE(user_id, motor_id)
       )
     ''');
 
-    // ========== TABEL #5: VOUCHERS ==========
-    /// Voucher diskon untuk booking service
-    /// FITUR: Shake detector, bengkel reward, expiry date
     await db.execute('''
       CREATE TABLE vouchers (
         id $idType,
-        code $textType UNIQUE,        -- Voucher code (contoh: "SKE-12345")
-        title $textType,              -- Judul voucher
-        description $textType,        -- Deskripsi
-        discountPercent $intType,     -- Persentase diskon (contoh: 15)
-        type $textType,               -- 'shake' atau 'bengkel'
-        dateObtained $textType,       -- Tanggal dapat voucher
-        expiryDate $textType,         -- Tanggal kadaluarsa
-        dateUsed $textTypeNull,       -- Tanggal pakai voucher (null jika belum)
-        isUsed $intType DEFAULT 0,    -- 0 = belum pakai, 1 = sudah pakai
-        bengkelName $textTypeNull,    -- Nama bengkel (jika voucher dari bengkel)
-        bengkelDistance $realTypeNull, -- Jarak ke bengkel (untuk tracking)
-        booking_id $intTypeNull,      -- Foreign key ke bookings (jika sudah dipakai)
-        user_id $intTypeNull          -- Foreign key ke users (pemilik voucher)
+        code $textType UNIQUE,
+        title $textType,
+        description $textType,
+        discountPercent $intType,
+        type $textType,
+        dateObtained $textType,
+        expiryDate $textType,
+        dateUsed $textTypeNull,
+        isUsed $intType DEFAULT 0,
+        bengkelName $textTypeNull,
+        bengkelDistance $realTypeNull,
+        booking_id $intTypeNull,
+        user_id $intTypeNull
       )
     ''');
 
-    // ========== TABEL #6: BOOKINGS ==========
-    /// Sistem booking service bengkel
-    /// FITUR KOMPLEKS: Queue management, voucher discount, QR code
     await db.execute('''
       CREATE TABLE bookings (
         id $idType,
-        user_id $intType,             -- Foreign key: siapa yang booking
-        bengkel_id $intType,          -- Foreign key: bengkel mana
-        motor_merk $textType,         -- Merk motor yang di-service
-        motor_tipe $textType,         -- Tipe motor
-        motor_tahun $intType,         -- Tahun motor
-        motor_plat $textType,         -- Plat nomor motor
-        service_type $textType,       -- 'ringan', 'sedang', 'besar'
-        booking_date $textType,       -- Tanggal booking (YYYY-MM-DD)
-        booking_time_slot $textType,  -- Jam booking (08:00, 09:00, dst)
-        queue_number $textType,       -- Nomor antrian (contoh: 3)
-        notes $textTypeNull,          -- Catatan tambahan
-        original_price $realType,     -- Harga asli (sebelum diskon)
-        discount_amount $realType DEFAULT 0, -- Jumlah diskon (dari voucher)
-        final_price $realType,        -- Harga akhir (setelah diskon)
-        voucher_id $intTypeNull,      -- Foreign key ke vouchers
-        voucher_code $textTypeNull,   -- Kode voucher yang dipakai
-        status $textType DEFAULT 'confirmed', -- 'confirmed', 'completed', 'cancelled'
-        booking_code $textType UNIQUE, -- Booking code unik (BK20241203001)
-        qr_code_data $textTypeNull,   -- Data untuk generate QR code
-        created_at $textType,         -- Timestamp create
-        updated_at $textTypeNull      -- Timestamp update
+        user_id $intType,
+        bengkel_id $intType,
+        motor_merk $textType,
+        motor_tipe $textType,
+        motor_tahun $intType,
+        motor_plat $textType,
+        service_type $textType,
+        booking_date $textType,
+        booking_time_slot $textType,
+        queue_number $textType,
+        notes $textTypeNull,
+        original_price $realType,
+        discount_amount $realType DEFAULT 0,
+        final_price $realType,
+        voucher_id $intTypeNull,
+        voucher_code $textTypeNull,
+        status $textType DEFAULT 'confirmed',
+        booking_code $textType UNIQUE,
+        qr_code_data $textTypeNull,
+        created_at $textType,
+        updated_at $textTypeNull
       )
     ''');
 
-    // ========== TABEL #7: BOOKING SLOTS ==========
-    /// Manajemen slot waktu booking (prevent double booking)
-    /// PRESENTASI: Ini memastikan 1 jam hanya bisa 1 booking
     await db.execute('''
       CREATE TABLE booking_slots (
         id $idType,
@@ -204,7 +150,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // User shake status table
     await db.execute('''
       CREATE TABLE user_shake_status (
         user_id $intType PRIMARY KEY,
@@ -223,12 +168,10 @@ class DatabaseHelper {
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      // Add new columns to motor_listing
       await db.execute('ALTER TABLE motor_listing ADD COLUMN latitude REAL');
       await db.execute('ALTER TABLE motor_listing ADD COLUMN longitude REAL');
       await db.execute('ALTER TABLE motor_listing ADD COLUMN user_id INTEGER');
-      
-      // Create favorites table
+
       await db.execute('''
         CREATE TABLE IF NOT EXISTS favorites (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -239,9 +182,8 @@ class DatabaseHelper {
         )
       ''');
     }
-    
+
     if (oldVersion < 3) {
-      // Create vouchers table
       await db.execute('''
         CREATE TABLE IF NOT EXISTS vouchers (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -259,8 +201,7 @@ class DatabaseHelper {
           booking_id INTEGER
         )
       ''');
-      
-      // Create bookings table
+
       await db.execute('''
         CREATE TABLE IF NOT EXISTS bookings (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -287,8 +228,7 @@ class DatabaseHelper {
           updated_at TEXT
         )
       ''');
-      
-      // Create booking_slots table
+
       await db.execute('''
         CREATE TABLE IF NOT EXISTS booking_slots (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -301,8 +241,7 @@ class DatabaseHelper {
           UNIQUE(bengkel_id, booking_date, time_slot)
         )
       ''');
-      
-      // Create user_shake_status table
+
       await db.execute('''
         CREATE TABLE IF NOT EXISTS user_shake_status (
           user_id INTEGER PRIMARY KEY,
@@ -311,19 +250,18 @@ class DatabaseHelper {
         )
       ''');
     }
-    
+
     if (oldVersion < 4) {
-      // Add user_id column to vouchers table if not exists
       try {
-        // Check if column already exists
         final result = await db.rawQuery('PRAGMA table_info(vouchers)');
-        final hasUserIdColumn = result.any((column) => column['name'] == 'user_id');
-        
+        final hasUserIdColumn = result.any(
+          (column) => column['name'] == 'user_id',
+        );
+
         if (!hasUserIdColumn) {
           await db.execute('ALTER TABLE vouchers ADD COLUMN user_id INTEGER');
         }
       } catch (e) {
-        // Column might already exist, ignore error
         print('Note: user_id column might already exist: $e');
       }
     }
@@ -350,52 +288,24 @@ class DatabaseHelper {
     return null;
   }
 
-  // Delete user account and all associated data
   Future<void> deleteUserAccount(int userId) async {
     final db = await instance.database;
-    
-    // Delete in order to respect foreign key constraints
-    // Delete user's motor listings
-    await db.delete(
-      'motor_listing',
-      where: 'user_id = ?',
-      whereArgs: [userId],
-    );
-    
-    // Delete user's favorites
-    await db.delete(
-      'favorites',
-      where: 'user_id = ?',
-      whereArgs: [userId],
-    );
-    
-    // Delete user's vouchers
-    await db.delete(
-      'vouchers',
-      where: 'user_id = ?',
-      whereArgs: [userId],
-    );
-    
-    // Delete user's bookings
-    await db.delete(
-      'bookings',
-      where: 'user_id = ?',
-      whereArgs: [userId],
-    );
-    
-    // Delete shake history (user_shake_status table)
+
+    await db.delete('motor_listing', where: 'user_id = ?', whereArgs: [userId]);
+
+    await db.delete('favorites', where: 'user_id = ?', whereArgs: [userId]);
+
+    await db.delete('vouchers', where: 'user_id = ?', whereArgs: [userId]);
+
+    await db.delete('bookings', where: 'user_id = ?', whereArgs: [userId]);
+
     await db.delete(
       'user_shake_status',
       where: 'user_id = ?',
       whereArgs: [userId],
     );
-    
-    // Finally delete the user
-    await db.delete(
-      'users',
-      where: 'id = ?',
-      whereArgs: [userId],
-    );
+
+    await db.delete('users', where: 'id = ?', whereArgs: [userId]);
   }
 
   // Motor Listing CRUD operations
@@ -496,11 +406,7 @@ class DatabaseHelper {
 
   Future<int> deleteMotorListing(int id) async {
     final db = await instance.database;
-    return await db.delete(
-      'motor_listing',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('motor_listing', where: 'id = ?', whereArgs: [id]);
   }
 
   // Bengkel operations
@@ -517,15 +423,11 @@ class DatabaseHelper {
   // Favorites operations
   Future<void> addFavorite(int userId, int motorId) async {
     final db = await instance.database;
-    await db.insert(
-      'favorites',
-      {
-        'user_id': userId,
-        'motor_id': motorId,
-        'created_at': DateTime.now().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('favorites', {
+      'user_id': userId,
+      'motor_id': motorId,
+      'created_at': DateTime.now().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> removeFavorite(int userId, int motorId) async {
@@ -549,12 +451,15 @@ class DatabaseHelper {
 
   Future<List<MotorListing>> getFavoriteMotors(int userId) async {
     final db = await instance.database;
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
       SELECT m.* FROM motor_listing m
       INNER JOIN favorites f ON m.id = f.motor_id
       WHERE f.user_id = ?
       ORDER BY f.created_at DESC
-    ''', [userId]);
+    ''',
+      [userId],
+    );
     return result.map((map) => MotorListing.fromMap(map)).toList();
   }
 
@@ -578,15 +483,15 @@ class DatabaseHelper {
   Future<List<Voucher>> getUnusedVouchers({int? userId}) async {
     final db = await instance.database;
     final now = DateTime.now().toIso8601String();
-    
+
     String where = 'isUsed = ? AND expiryDate > ?';
     List<dynamic> whereArgs = [0, now];
-    
+
     if (userId != null) {
       where += ' AND user_id = ?';
       whereArgs.add(userId);
     }
-    
+
     final result = await db.query(
       'vouchers',
       where: where,
@@ -628,11 +533,7 @@ class DatabaseHelper {
 
   Future<Map<String, dynamic>?> getBookingById(int id) async {
     final db = await instance.database;
-    final result = await db.query(
-      'bookings',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    final result = await db.query('bookings', where: 'id = ?', whereArgs: [id]);
     return result.isNotEmpty ? result.first : null;
   }
 
@@ -648,11 +549,12 @@ class DatabaseHelper {
 
   Future<String> generateBookingCode() async {
     final now = DateTime.now();
-    final dateCode = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final dateCode =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     final targetDate = now.toIso8601String().split('T')[0];
-    
+
     final db = await instance.database;
-    
+
     // Use transaction to prevent race condition
     return await db.transaction((txn) async {
       // Query with LIKE to match date format stored in database
@@ -661,37 +563,37 @@ class DatabaseHelper {
         ['$targetDate%'],
       );
       final count = result.first['count'] as int;
-      
+
       // Keep generating until we find a unique code
       String bookingCode;
       int sequence = count + 1;
       bool isUnique = false;
-      
+
       while (!isUnique) {
         bookingCode = 'BOOK-$dateCode-${sequence.toString().padLeft(3, '0')}';
-        
+
         // Check if this code already exists
         final existingResult = await txn.rawQuery(
           'SELECT COUNT(*) as count FROM bookings WHERE booking_code = ?',
           [bookingCode],
         );
         final existingCount = existingResult.first['count'] as int;
-        
+
         if (existingCount == 0) {
           isUnique = true;
           return bookingCode;
         }
-        
+
         sequence++; // Try next sequence number
       }
-      
+
       return 'BOOK-$dateCode-${sequence.toString().padLeft(3, '0')}';
     });
   }
 
   Future<String> generateQueueNumber(String bookingDate) async {
     final db = await instance.database;
-    
+
     // Use transaction to prevent race condition
     return await db.transaction((txn) async {
       // Query with LIKE to match date format stored in database
@@ -700,30 +602,30 @@ class DatabaseHelper {
         ['$bookingDate%'],
       );
       final count = result.first['count'] as int;
-      
+
       // Keep generating until we find a unique queue number for this date
       String queueNumber;
       int sequence = count + 1;
       bool isUnique = false;
-      
+
       while (!isUnique) {
         queueNumber = 'A${sequence.toString().padLeft(3, '0')}';
-        
+
         // Check if this queue number already exists for this date
         final existingResult = await txn.rawQuery(
           'SELECT COUNT(*) as count FROM bookings WHERE booking_date LIKE ? AND queue_number = ?',
           ['$bookingDate%', queueNumber],
         );
         final existingCount = existingResult.first['count'] as int;
-        
+
         if (existingCount == 0) {
           isUnique = true;
           return queueNumber;
         }
-        
+
         sequence++; // Try next sequence number
       }
-      
+
       return 'A${sequence.toString().padLeft(3, '0')}';
     });
   }
@@ -732,30 +634,35 @@ class DatabaseHelper {
   Future<void> initializeSlots(int bengkelId, String date) async {
     final db = await instance.database;
     final slots = [
-      '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00',
-      '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00',
+      '08:00-09:00',
+      '09:00-10:00',
+      '10:00-11:00',
+      '11:00-12:00',
+      '13:00-14:00',
+      '14:00-15:00',
+      '15:00-16:00',
+      '16:00-17:00',
     ];
-    
+
     for (var slot in slots) {
-      await db.insert(
-        'booking_slots',
-        {
-          'bengkel_id': bengkelId,
-          'booking_date': date,
-          'time_slot': slot,
-          'is_available': 1,
-          'max_capacity': 1,
-          'current_bookings': 0,
-        },
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
+      await db.insert('booking_slots', {
+        'bengkel_id': bengkelId,
+        'booking_date': date,
+        'time_slot': slot,
+        'is_available': 1,
+        'max_capacity': 1,
+        'current_bookings': 0,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
   }
 
-  Future<List<Map<String, dynamic>>> getAvailableSlots(int bengkelId, String date) async {
+  Future<List<Map<String, dynamic>>> getAvailableSlots(
+    int bengkelId,
+    String date,
+  ) async {
     final db = await instance.database;
     await initializeSlots(bengkelId, date);
-    
+
     return await db.query(
       'booking_slots',
       where: 'bengkel_id = ? AND booking_date = ? AND is_available = 1',
@@ -792,22 +699,18 @@ class DatabaseHelper {
       where: 'user_id = ?',
       whereArgs: [userId],
     );
-    
+
     if (result.isEmpty) return false;
     return result.first['has_shaken'] == 1;
   }
 
   Future<void> markUserShaken(int userId) async {
     final db = await instance.database;
-    await db.insert(
-      'user_shake_status',
-      {
-        'user_id': userId,
-        'has_shaken': 1,
-        'shake_date': DateTime.now().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('user_shake_status', {
+      'user_id': userId,
+      'has_shaken': 1,
+      'shake_date': DateTime.now().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> close() async {

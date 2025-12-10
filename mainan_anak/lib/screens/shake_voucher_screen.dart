@@ -50,9 +50,9 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -64,7 +64,7 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
       // Get current user ID first
       final authService = AuthService();
       final userId = await authService.getCurrentUserId() ?? 1;
-      
+
       // Generate voucher with userId
       final voucher = _voucherService.generateVoucher(
         bengkelName: widget.bengkel.nama,
@@ -83,7 +83,10 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
         title: 'Voucher Baru!',
         voucherTitle: savedVoucher.title,
         discountPercent: savedVoucher.discountPercent,
-        expiryDate: DateFormat('d MMM yyyy', 'id_ID').format(savedVoucher.expiryDate),
+        expiryDate: DateFormat(
+          'd MMM yyyy',
+          'id_ID',
+        ).format(savedVoucher.expiryDate),
       );
 
       // Show success dialog
@@ -96,9 +99,9 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -220,10 +223,10 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
                         ),
                       )
                     : _hasShaken
-                        ? _buildAlreadyShaken()
-                        : _canShake
-                            ? _buildShakeDetector()
-                            : _buildTooFar(),
+                    ? _buildAlreadyShaken()
+                    : _canShake
+                    ? _buildShakeDetector()
+                    : _buildTooFar(),
               ),
             ],
           ),
@@ -244,15 +247,13 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFF252525),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF2196F3).withValues(alpha: 0.3)),
+              border: Border.all(
+                color: const Color(0xFF2196F3).withValues(alpha: 0.3),
+              ),
             ),
             child: Column(
               children: [
-                const Icon(
-                  Icons.store,
-                  size: 64,
-                  color: Color(0xFF2196F3),
-                ),
+                const Icon(Icons.store, size: 64, color: Color(0xFF2196F3)),
                 const SizedBox(height: 16),
                 Text(
                   widget.bengkel.nama,
@@ -267,11 +268,18 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.location_on, color: Color(0xFF2196F3), size: 16),
+                    const Icon(
+                      Icons.location_on,
+                      color: Color(0xFF2196F3),
+                      size: 16,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${widget.distance.toStringAsFixed(2)} km dari Anda',
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -293,10 +301,7 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
           const SizedBox(height: 40),
 
           // Shake Detector Widget
-          ShakeDetectorWidget(
-            onShakeDetected: _handleShake,
-            isEnabled: true,
-          ),
+          ShakeDetectorWidget(onShakeDetected: _handleShake, isEnabled: true),
           const SizedBox(height: 24),
 
           // Hint
@@ -305,7 +310,9 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFF2196F3).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFF2196F3).withValues(alpha: 0.3)),
+              border: Border.all(
+                color: const Color(0xFF2196F3).withValues(alpha: 0.3),
+              ),
             ),
             child: const Row(
               children: [
@@ -337,7 +344,10 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF252525),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.5), width: 2),
+                border: Border.all(
+                  color: Colors.orange.withValues(alpha: 0.5),
+                  width: 2,
+                ),
               ),
               child: const Icon(
                 Icons.check_circle,
@@ -369,7 +379,10 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2196F3),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
               ),
             ),
           ],
@@ -390,7 +403,10 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF252525),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.red.withValues(alpha: 0.5), width: 2),
+                border: Border.all(
+                  color: Colors.red.withValues(alpha: 0.5),
+                  width: 2,
+                ),
               ),
               child: const Icon(
                 Icons.location_off,
@@ -422,7 +438,10 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2196F3),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
               ),
             ),
           ],
@@ -431,4 +450,3 @@ class _ShakeVoucherScreenState extends State<ShakeVoucherScreen> {
     );
   }
 }
-

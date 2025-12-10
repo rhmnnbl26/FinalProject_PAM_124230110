@@ -16,9 +16,11 @@ class VoucherCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final daysUntilExpiry = voucher.expiryDate.difference(DateTime.now()).inDays;
+    final daysUntilExpiry = voucher.expiryDate
+        .difference(DateTime.now())
+        .inDays;
     final isExpiringSoon = daysUntilExpiry <= 7 && daysUntilExpiry > 0;
-    
+
     return GestureDetector(
       onTap: voucher.isValid ? onTap : null,
       child: Container(
@@ -37,7 +39,9 @@ class VoucherCardWidget extends StatelessWidget {
                 ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.2),
+            color: isSelected
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.2),
             width: isSelected ? 3 : 1,
           ),
           boxShadow: [
@@ -58,7 +62,10 @@ class VoucherCardWidget extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(20),
@@ -74,11 +81,20 @@ class VoucherCardWidget extends StatelessWidget {
                       ),
                       const Spacer(),
                       if (voucher.isUsed)
-                        _buildBadge('TERPAKAI', Colors.white.withValues(alpha: 0.3))
+                        _buildBadge(
+                          'TERPAKAI',
+                          Colors.white.withValues(alpha: 0.3),
+                        )
                       else if (voucher.isExpired)
-                        _buildBadge('KADALUARSA', Colors.white.withValues(alpha: 0.3))
+                        _buildBadge(
+                          'KADALUARSA',
+                          Colors.white.withValues(alpha: 0.3),
+                        )
                       else if (isExpiringSoon)
-                        _buildBadge('$daysUntilExpiry HARI LAGI', Colors.orange.withValues(alpha: 0.8)),
+                        _buildBadge(
+                          '$daysUntilExpiry HARI LAGI',
+                          Colors.orange.withValues(alpha: 0.8),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -112,10 +128,7 @@ class VoucherCardWidget extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow(
-                          Icons.confirmation_number,
-                          voucher.code,
-                        ),
+                        _buildInfoRow(Icons.confirmation_number, voucher.code),
                         const SizedBox(height: 8),
                         _buildInfoRow(
                           Icons.access_time,
@@ -193,4 +206,3 @@ class VoucherCardWidget extends StatelessWidget {
     );
   }
 }
-

@@ -55,9 +55,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
 
   Future<void> _pickImages() async {
     if (_selectedImages.length >= 5) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maksimal 5 foto')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Maksimal 5 foto')));
       return;
     }
 
@@ -71,7 +71,7 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
 
       if (image != null) {
         final imageFile = File(image.path);
-        
+
         // Validate file size (max 5MB)
         final fileSize = await imageFile.length();
         if (fileSize > 5 * 1024 * 1024) {
@@ -90,9 +90,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error memilih gambar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error memilih gambar: $e')));
       }
     }
   }
@@ -108,14 +108,14 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final motorImagesDir = Directory('${appDir.path}/motor_images');
-      
+
       if (!await motorImagesDir.exists()) {
         await motorImagesDir.create(recursive: true);
       }
 
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_$index.jpg';
       final savedImage = await image.copy('${motorImagesDir.path}/$fileName');
-      
+
       return savedImage.path;
     } catch (e) {
       debugPrint('Error saving image: $e');
@@ -183,7 +183,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
       await DatabaseHelper.instance.createMotorListing(motor);
 
       // Show notification
-      await LocalNotificationService.instance.showMotorAddedNotification(motor.nama);
+      await LocalNotificationService.instance.showMotorAddedNotification(
+        motor.nama,
+      );
 
       if (!mounted) return;
 
@@ -206,16 +208,18 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Motor berhasil ditambahkan!${position != null ? " (Lokasi tersimpan)" : ""}'),
+          content: Text(
+            'Motor berhasil ditambahkan!${position != null ? " (Lokasi tersimpan)" : ""}',
+          ),
           backgroundColor: const Color(0xFF2196F3),
         ),
       );
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error menambahkan motor: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error menambahkan motor: $e')));
       }
     }
   }
@@ -240,11 +244,17 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                 children: [
                   // App Bar
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const Expanded(
@@ -269,7 +279,11 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                         _buildStepLine(0),
                         _buildStepIndicator(1, 'Spec', Icons.build_outlined),
                         _buildStepLine(1),
-                        _buildStepIndicator(2, 'Foto', Icons.photo_camera_outlined),
+                        _buildStepIndicator(
+                          2,
+                          'Foto',
+                          Icons.photo_camera_outlined,
+                        ),
                       ],
                     ),
                   ),
@@ -302,8 +316,12 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                               icon: const Icon(Icons.arrow_back),
                               label: const Text('Kembali'),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                side: const BorderSide(color: Color(0xFF2196F3)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                side: const BorderSide(
+                                  color: Color(0xFF2196F3),
+                                ),
                                 foregroundColor: const Color(0xFF2196F3),
                               ),
                             ),
@@ -313,12 +331,19 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                           flex: _currentStep == 0 ? 1 : 1,
                           child: ElevatedButton.icon(
                             onPressed: _isLoading ? null : _handleNextStep,
-                            icon: Icon(_currentStep == 2 ? Icons.check : Icons.arrow_forward),
+                            icon: Icon(
+                              _currentStep == 2
+                                  ? Icons.check
+                                  : Icons.arrow_forward,
+                            ),
                             label: _isLoading
                                 ? const SizedBox(
                                     height: 20,
                                     width: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
                                   )
                                 : Text(
                                     _currentStep == 2 ? 'Selesai' : 'Lanjut',
@@ -346,23 +371,24 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
   Widget _buildStepIndicator(int step, String label, IconData icon) {
     final isActive = _currentStep == step;
     final isCompleted = _currentStep > step;
-    
+
     return Column(
       children: [
         Container(
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: isCompleted || isActive ? Colors.white : Colors.white.withValues(alpha: 0.3),
+            color: isCompleted || isActive
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.3),
             shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white,
-              width: 2,
-            ),
+            border: Border.all(color: Colors.white, width: 2),
           ),
           child: Icon(
             isCompleted ? Icons.check : icon,
-            color: isCompleted || isActive ? const Color(0xFF2196F3) : Colors.white,
+            color: isCompleted || isActive
+                ? const Color(0xFF2196F3)
+                : Colors.white,
             size: 24,
           ),
         ),
@@ -403,46 +429,50 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
 
   bool _validateInfoStep() {
     if (_namaController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nama motor wajib diisi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nama motor wajib diisi')));
       return false;
     }
     if (_brandController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Brand wajib diisi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Brand wajib diisi')));
       return false;
     }
     if (_deskripsiController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Deskripsi wajib diisi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Deskripsi wajib diisi')));
       return false;
     }
     return true;
   }
 
   bool _validateSpecStep() {
-    if (_ccController.text.trim().isEmpty || int.tryParse(_ccController.text.trim()) == null) {
+    if (_ccController.text.trim().isEmpty ||
+        int.tryParse(_ccController.text.trim()) == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('CC mesin harus diisi dengan angka')),
       );
       return false;
     }
-    if (_tahunController.text.trim().isEmpty || int.tryParse(_tahunController.text.trim()) == null) {
+    if (_tahunController.text.trim().isEmpty ||
+        int.tryParse(_tahunController.text.trim()) == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tahun harus diisi dengan angka')),
       );
       return false;
     }
-    if (_hargaController.text.trim().isEmpty || double.tryParse(_hargaController.text.trim()) == null) {
+    if (_hargaController.text.trim().isEmpty ||
+        double.tryParse(_hargaController.text.trim()) == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Harga harus diisi dengan angka')),
       );
       return false;
     }
-    if (_kilometerController.text.trim().isEmpty || int.tryParse(_kilometerController.text.trim()) == null) {
+    if (_kilometerController.text.trim().isEmpty ||
+        int.tryParse(_kilometerController.text.trim()) == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Kilometer harus diisi dengan angka')),
       );
@@ -468,7 +498,10 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                     color: const Color(0xFF2196F3).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.info_outline, color: Color(0xFF2196F3)),
+                  child: const Icon(
+                    Icons.info_outline,
+                    color: Color(0xFF2196F3),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Text(
@@ -483,7 +516,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               decoration: InputDecoration(
                 labelText: 'Nama Motor *',
                 hintText: 'Contoh: Ducati Panigale V4',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.motorcycle),
               ),
             ),
@@ -493,7 +528,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               decoration: InputDecoration(
                 labelText: 'Brand/Merk *',
                 hintText: 'Contoh: Ducati',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.branding_watermark),
               ),
             ),
@@ -503,7 +540,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               decoration: InputDecoration(
                 labelText: 'Deskripsi *',
                 hintText: 'Ceritakan kondisi dan keunggulan motor Anda...',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.description),
                 alignLabelWithHint: true,
               ),
@@ -514,7 +553,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               controller: _lokasiController,
               decoration: InputDecoration(
                 labelText: 'Lokasi *',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.location_on),
               ),
             ),
@@ -524,7 +565,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               decoration: InputDecoration(
                 labelText: 'Link Instagram *',
                 hintText: 'https://instagram.com/...',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.link),
               ),
             ),
@@ -534,7 +577,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               decoration: InputDecoration(
                 labelText: 'Kontak (Opsional)',
                 hintText: '08123456789',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.phone),
               ),
             ),
@@ -561,7 +606,10 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                     color: const Color(0xFF2196F3).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.build_outlined, color: Color(0xFF2196F3)),
+                  child: const Icon(
+                    Icons.build_outlined,
+                    color: Color(0xFF2196F3),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Text(
@@ -579,7 +627,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                     decoration: InputDecoration(
                       labelText: 'CC Mesin *',
                       hintText: '600',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       suffixText: 'cc',
                       prefixIcon: const Icon(Icons.speed),
                     ),
@@ -593,7 +643,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                     decoration: InputDecoration(
                       labelText: 'Tahun *',
                       hintText: '2024',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       prefixIcon: const Icon(Icons.calendar_today),
                     ),
                     keyboardType: TextInputType.number,
@@ -607,7 +659,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               decoration: InputDecoration(
                 labelText: 'Harga (IDR) *',
                 hintText: '150000000',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixText: 'Rp ',
                 prefixIcon: const Icon(Icons.attach_money),
               ),
@@ -619,7 +673,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               decoration: InputDecoration(
                 labelText: 'Kilometer *',
                 hintText: '5000',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 suffixText: 'km',
                 prefixIcon: const Icon(Icons.route),
               ),
@@ -630,7 +686,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               initialValue: _kondisi,
               decoration: InputDecoration(
                 labelText: 'Kondisi *',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 prefixIcon: const Icon(Icons.check_circle_outline),
               ),
               items: const [
@@ -664,7 +722,10 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                     color: const Color(0xFF2196F3).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.photo_camera_outlined, color: Color(0xFF2196F3)),
+                  child: const Icon(
+                    Icons.photo_camera_outlined,
+                    color: Color(0xFF2196F3),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
@@ -708,7 +769,10 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF2196F3),
                           borderRadius: BorderRadius.circular(20),
@@ -757,8 +821,9 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
               itemCount: 5,
               itemBuilder: (context, index) {
                 if (index < _selectedImages.length) {
-                  if (index == 0) return const SizedBox.shrink(); // Skip first image (shown as large preview)
-                  
+                  if (index == 0)
+                    return const SizedBox.shrink(); // Skip first image (shown as large preview)
+
                   return Stack(
                     children: [
                       Container(
@@ -792,7 +857,7 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                     ],
                   );
                 }
-                
+
                 if (_selectedImages.length < 5) {
                   return GestureDetector(
                     onTap: _pickImages,
@@ -814,7 +879,7 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
                     ),
                   );
                 }
-                
+
                 return const SizedBox.shrink();
               },
             ),
@@ -824,4 +889,3 @@ class _TambahMotorScreenState extends State<TambahMotorScreen> {
     );
   }
 }
-

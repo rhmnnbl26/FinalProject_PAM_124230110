@@ -20,10 +20,10 @@ class _LbsScreenState extends State<LbsScreen> {
   double? _distance;
   String? _errorMessage;
   LatLng? _currentPosition;
-  
+
   // Koordinat default: Bengkel Motor Rumah
   static const LatLng _defaultBengkelLocation = LatLng(-7.7482380, 110.4084390);
-  
+
   final Set<Marker> _markers = {};
 
   @override
@@ -41,11 +41,11 @@ class _LbsScreenState extends State<LbsScreen> {
 
   Future<void> _checkPermissionAndLoad() async {
     setState(() => _isLoading = true);
-    
+
     try {
       // Check permission
       final hasPermission = await _lbsService.isLocationPermissionGranted();
-      
+
       if (!hasPermission) {
         setState(() {
           _hasPermission = false;
@@ -55,11 +55,11 @@ class _LbsScreenState extends State<LbsScreen> {
       }
 
       setState(() => _hasPermission = true);
-      
+
       // Load bengkel data
       final bengkel = await DatabaseHelper.instance.getBengkel();
       setState(() => _bengkel = bengkel);
-      
+
       // Calculate distance
       await _calculateDistance();
     } catch (e) {
@@ -72,7 +72,7 @@ class _LbsScreenState extends State<LbsScreen> {
 
   Future<void> _requestPermission() async {
     final granted = await _lbsService.requestLocationPermission();
-    
+
     if (granted) {
       _checkPermissionAndLoad();
     } else {
@@ -89,21 +89,21 @@ class _LbsScreenState extends State<LbsScreen> {
   Future<void> _calculateDistance() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
-    
+
     try {
       final position = await _lbsService.getCurrentPosition();
       final distance = await _lbsService.calculateDistanceToBengkel();
-      
+
       if (!mounted) return;
       setState(() {
         _distance = distance;
         _isLoading = false;
         _errorMessage = null;
-        
+
         if (position != null) {
           _currentPosition = LatLng(position.latitude, position.longitude);
           _updateMarkers();
-          
+
           // Move camera to show both markers - check if controller is still valid
           if (mounted && _mapController != null && _bengkel != null) {
             try {
@@ -111,19 +111,19 @@ class _LbsScreenState extends State<LbsScreen> {
                 CameraUpdate.newLatLngBounds(
                   LatLngBounds(
                     southwest: LatLng(
-                      _currentPosition!.latitude < _bengkel!.latitude 
-                          ? _currentPosition!.latitude 
+                      _currentPosition!.latitude < _bengkel!.latitude
+                          ? _currentPosition!.latitude
                           : _bengkel!.latitude,
-                      _currentPosition!.longitude < _bengkel!.longitude 
-                          ? _currentPosition!.longitude 
+                      _currentPosition!.longitude < _bengkel!.longitude
+                          ? _currentPosition!.longitude
                           : _bengkel!.longitude,
                     ),
                     northeast: LatLng(
-                      _currentPosition!.latitude > _bengkel!.latitude 
-                          ? _currentPosition!.latitude 
+                      _currentPosition!.latitude > _bengkel!.latitude
+                          ? _currentPosition!.latitude
                           : _bengkel!.latitude,
-                      _currentPosition!.longitude > _bengkel!.longitude 
-                          ? _currentPosition!.longitude 
+                      _currentPosition!.longitude > _bengkel!.longitude
+                          ? _currentPosition!.longitude
                           : _bengkel!.longitude,
                     ),
                   ),
@@ -148,7 +148,7 @@ class _LbsScreenState extends State<LbsScreen> {
 
   void _updateMarkers() {
     _markers.clear();
-    
+
     // Marker bengkel
     if (_bengkel != null) {
       _markers.add(
@@ -163,7 +163,7 @@ class _LbsScreenState extends State<LbsScreen> {
         ),
       );
     }
-    
+
     // Marker user location
     if (_currentPosition != null) {
       _markers.add(
@@ -182,7 +182,7 @@ class _LbsScreenState extends State<LbsScreen> {
 
   String _formatDistance(double? distance) {
     if (distance == null) return 'N/A';
-    
+
     if (distance < 1) {
       return '${(distance * 1000).toStringAsFixed(0)} meter';
     } else {
@@ -193,16 +193,14 @@ class _LbsScreenState extends State<LbsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lokasi Bengkel'),
-      ),
+      appBar: AppBar(title: const Text('Lokasi Bengkel')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : !_hasPermission
-              ? _buildPermissionRequired()
-              : _errorMessage != null
-                  ? _buildError()
-                  : _buildContent(),
+          ? _buildPermissionRequired()
+          : _errorMessage != null
+          ? _buildError()
+          : _buildContent(),
     );
   }
 
@@ -213,27 +211,17 @@ class _LbsScreenState extends State<LbsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.location_off,
-              size: 100,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.location_off, size: 100, color: Colors.grey[400]),
             const SizedBox(height: 24),
             const Text(
               'Izin Lokasi Diperlukan',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             const Text(
               'Aplikasi memerlukan izin lokasi untuk menghitung jarak Anda ke bengkel.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -254,11 +242,7 @@ class _LbsScreenState extends State<LbsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 100,
-              color: Colors.orange[300],
-            ),
+            Icon(Icons.error_outline, size: 100, color: Colors.orange[300]),
             const SizedBox(height: 24),
             Text(
               _errorMessage ?? 'Terjadi kesalahan',
@@ -294,7 +278,7 @@ class _LbsScreenState extends State<LbsScreen> {
               height: 300,
               child: GoogleMap(
                 initialCameraPosition: CameraPosition(
-                  target: _bengkel != null 
+                  target: _bengkel != null
                       ? LatLng(_bengkel!.latitude, _bengkel!.longitude)
                       : _defaultBengkelLocation,
                   zoom: 13,
@@ -312,7 +296,7 @@ class _LbsScreenState extends State<LbsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           Card(
             elevation: 4,
             shape: RoundedRectangleBorder(
@@ -347,10 +331,7 @@ class _LbsScreenState extends State<LbsScreen> {
                       children: [
                         const Text(
                           'Jarak dari lokasi Anda',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -378,10 +359,7 @@ class _LbsScreenState extends State<LbsScreen> {
                 children: [
                   const Text(
                     'Informasi Bengkel',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -454,4 +432,3 @@ class _LbsScreenState extends State<LbsScreen> {
     );
   }
 }
-

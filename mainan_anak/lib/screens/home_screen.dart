@@ -12,7 +12,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   List<MotorListing> _motors = [];
   List<MotorListing> _filteredMotors = [];
   bool _isLoading = true;
@@ -48,11 +49,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     setState(() => _isLoading = true);
     try {
       final motors = await DatabaseHelper.instance.getAllMotorListings();
-      
+
       // Calculate distances
       final distances = <int, double?>{};
       for (final motor in motors) {
-        if (motor.id != null && motor.latitude != null && motor.longitude != null) {
+        if (motor.id != null &&
+            motor.latitude != null &&
+            motor.longitude != null) {
           final distance = await _lbsService.calculateDistanceToMotor(
             motor.latitude,
             motor.longitude,
@@ -60,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           distances[motor.id!] = distance;
         }
       }
-      
+
       if (!mounted) return;
       setState(() {
         _motors = motors;
@@ -68,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         _applyFiltersAndSort();
         _isLoading = false;
       });
-      
+
       _animationController.forward();
     } catch (e) {
       if (!mounted) return;
@@ -93,30 +96,34 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   void _applyFiltersAndSort({String? searchQuery}) {
     var filtered = List<MotorListing>.from(_motors);
-    
+
     // Search filter
     final query = searchQuery ?? _searchController.text;
     if (query.isNotEmpty) {
-      filtered = filtered.where((motor) =>
-        motor.nama.toLowerCase().contains(query.toLowerCase()) ||
-        motor.brand.toLowerCase().contains(query.toLowerCase())).toList();
+      filtered = filtered
+          .where(
+            (motor) =>
+                motor.nama.toLowerCase().contains(query.toLowerCase()) ||
+                motor.brand.toLowerCase().contains(query.toLowerCase()),
+          )
+          .toList();
     }
-    
+
     // Brand filter
     if (_selectedBrand != null) {
       filtered = filtered.where((m) => m.brand == _selectedBrand).toList();
     }
-    
+
     // CC filter
     if (_selectedCC != null) {
       filtered = filtered.where((m) => m.cc == _selectedCC).toList();
     }
-    
+
     // Kondisi filter
     if (_selectedKondisi != null) {
       filtered = filtered.where((m) => m.kondisi == _selectedKondisi).toList();
     }
-    
+
     // Distance filter
     if (_selectedMaxDistance != null) {
       filtered = filtered.where((motor) {
@@ -125,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         return distance != null && distance <= _selectedMaxDistance!;
       }).toList();
     }
-    
+
     // Sorting
     switch (_sortBy) {
       case 'price_low':
@@ -146,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         // Keep current order (newest first from database)
         break;
     }
-    
+
     setState(() {
       _filteredMotors = filtered;
     });
@@ -270,7 +277,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 decoration: InputDecoration(
                   hintText: 'Search motorcycles...',
                   hintStyle: TextStyle(color: Colors.grey[600]),
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFF2196F3)),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Color(0xFF2196F3),
+                  ),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.tune, color: Color(0xFF2196F3)),
                     onPressed: _showFilterSheet,
@@ -290,10 +300,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 const SizedBox(width: 8),
                 Text(
                   '${_filteredMotors.length} motorcycles available',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -363,7 +370,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
         ),
         side: BorderSide(
-          color: selected ? const Color(0xFF2196F3) : Colors.white.withValues(alpha: 0.1),
+          color: selected
+              ? const Color(0xFF2196F3)
+              : Colors.white.withValues(alpha: 0.1),
         ),
       ),
     );
@@ -421,20 +430,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return SliverPadding(
       padding: const EdgeInsets.all(20),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final motor = _filteredMotors[index];
-            return _buildPremiumMotorCard(motor, index);
-          },
-          childCount: _filteredMotors.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final motor = _filteredMotors[index];
+          return _buildPremiumMotorCard(motor, index);
+        }, childCount: _filteredMotors.length),
       ),
     );
   }
 
   Widget _buildPremiumMotorCard(MotorListing motor, int index) {
     final distance = motor.id != null ? _motorDistances[motor.id] : null;
-    
+
     return TweenAnimationBuilder(
       duration: Duration(milliseconds: 300 + (index * 50)),
       tween: Tween<double>(begin: 0, end: 1),
@@ -486,7 +492,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               width: 110,
                               height: 110,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
+                              errorBuilder: (_, __, ___) =>
+                                  _buildPlaceholderImage(),
                             )
                           : _buildPlaceholderImage(),
                     ),
@@ -503,9 +510,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             horizontal: 8,
                             vertical: 4,
                           ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2196F3).withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(6),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF2196F3,
+                            ).withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             motor.brand,
@@ -612,19 +621,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(
-        Icons.motorcycle,
-        size: 50,
-        color: Colors.grey[700],
-      ),
+      child: Icon(Icons.motorcycle, size: 50, color: Colors.grey[700]),
     );
   }
 
   String _formatPrice(double price) {
-    return price.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    );
+    return price
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
   }
 }
 
@@ -701,9 +708,12 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Brand Filter
-          const Text('Brand', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const Text(
+            'Brand',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -724,11 +734,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // CC Filter
-          const Text('Engine CC', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const Text(
+            'Engine CC',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -749,11 +762,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Kondisi Filter
-          const Text('Condition', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const Text(
+            'Condition',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -782,11 +798,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Distance Filter
-          const Text('Max Distance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const Text(
+            'Max Distance',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -806,12 +825,13 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Apply Button
           ElevatedButton(
-            onPressed: () => widget.onApply(_brand, _cc, _kondisi, _maxDistance),
+            onPressed: () =>
+                widget.onApply(_brand, _cc, _kondisi, _maxDistance),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -823,4 +843,3 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
     );
   }
 }
-

@@ -64,7 +64,7 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
       // Get current user ID
       final authService = AuthService();
       final userId = await authService.getCurrentUserId() ?? 1;
-      
+
       // Get bengkel
       _bengkel = await DatabaseHelper.instance.getBengkel();
 
@@ -73,7 +73,10 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
         _distance = await _lbsService.calculateDistanceToBengkel();
         final position = await _lbsService.getCurrentPosition();
         if (position != null) {
-          _currentPositionLatLng = LatLng(position.latitude, position.longitude);
+          _currentPositionLatLng = LatLng(
+            position.latitude,
+            position.longitude,
+          );
         }
       }
 
@@ -96,9 +99,9 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -107,21 +110,25 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
     _markers.clear();
 
     if (_bengkel != null) {
-      _markers.add(Marker(
-        markerId: const MarkerId('bengkel'),
-        position: LatLng(_bengkel!.latitude, _bengkel!.longitude),
-        infoWindow: InfoWindow(title: _bengkel!.nama),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      ));
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('bengkel'),
+          position: LatLng(_bengkel!.latitude, _bengkel!.longitude),
+          infoWindow: InfoWindow(title: _bengkel!.nama),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      );
     }
 
     if (_currentPositionLatLng != null) {
-      _markers.add(Marker(
-        markerId: const MarkerId('user'),
-        position: _currentPositionLatLng!,
-        infoWindow: const InfoWindow(title: 'Lokasi Anda'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-      ));
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('user'),
+          position: _currentPositionLatLng!,
+          infoWindow: const InfoWindow(title: 'Lokasi Anda'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      );
     }
   }
 
@@ -132,10 +139,8 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => ShakeVoucherScreen(
-          bengkel: _bengkel!,
-          distance: _distance!,
-        ),
+        builder: (context) =>
+            ShakeVoucherScreen(bengkel: _bengkel!, distance: _distance!),
       ),
     );
 
@@ -163,7 +168,9 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF2196F3)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF2196F3)),
+            )
           : TabBarView(
               controller: _tabController,
               children: [
@@ -226,13 +233,20 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    const Icon(Icons.location_on, color: Color(0xFF2196F3), size: 20),
+                    const Icon(
+                      Icons.location_on,
+                      color: Color(0xFF2196F3),
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       _distance != null
                           ? '${_distance!.toStringAsFixed(2)} km dari lokasi Anda'
                           : 'Jarak tidak tersedia',
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -258,10 +272,7 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.grey.shade800,
-                    Colors.grey.shade900,
-                  ],
+                  colors: [Colors.grey.shade800, Colors.grey.shade900],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
@@ -274,7 +285,11 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                       color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.check_circle, color: Colors.white70, size: 32),
+                    child: const Icon(
+                      Icons.check_circle,
+                      color: Colors.white70,
+                      size: 32,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   const Expanded(
@@ -321,7 +336,11 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                       color: Colors.orange.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.warning_amber, color: Colors.orange, size: 32),
+                    child: const Icon(
+                      Icons.warning_amber,
+                      color: Colors.orange,
+                      size: 32,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -341,7 +360,10 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                           _distance != null && _distance! > 5.0
                               ? 'Datang ke bengkel kami (max 5km) untuk dapatkan promo!'
                               : 'Aktifkan lokasi Anda untuk mendapatkan promo',
-                          style: const TextStyle(color: Colors.white70, fontSize: 13),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -409,7 +431,10 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
                         ),
                         const SizedBox(height: 20),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(30),
@@ -549,4 +574,3 @@ class _BengkelVoucherScreenState extends State<BengkelVoucherScreen>
     );
   }
 }
-

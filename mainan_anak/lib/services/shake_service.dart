@@ -5,13 +5,14 @@ import 'database_helper.dart';
 
 class ShakeService {
   static final ShakeService instance = ShakeService._init();
-  
+
   ShakeService._init();
 
   // Shake detection parameters
-  static const double _shakeThreshold = 25.0; // Sensitivity threshold (increased from 15)
+  static const double _shakeThreshold =
+      25.0; // Sensitivity threshold (increased from 15)
   static const int _shakeTimeWindow = 1000; // milliseconds (increased from 500)
-  
+
   DateTime? _lastShakeTime;
   final _shakeController = StreamController<bool>.broadcast();
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
@@ -22,10 +23,10 @@ class ShakeService {
   void startListening() {
     _accelerometerSubscription = accelerometerEventStream().listen((event) {
       final acceleration = event.x.abs() + event.y.abs() + event.z.abs();
-      
+
       if (acceleration > _shakeThreshold) {
         final now = DateTime.now();
-        
+
         if (_lastShakeTime == null ||
             now.difference(_lastShakeTime!).inMilliseconds > _shakeTimeWindow) {
           _lastShakeTime = now;

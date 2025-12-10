@@ -12,7 +12,8 @@ class MotorMarketplaceScreen extends StatefulWidget {
   State<MotorMarketplaceScreen> createState() => _MotorMarketplaceScreenState();
 }
 
-class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with SingleTickerProviderStateMixin {
+class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen>
+    with SingleTickerProviderStateMixin {
   List<MotorListing> _motors = [];
   List<MotorListing> _filteredMotors = [];
   bool _isLoading = true;
@@ -48,11 +49,13 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
     setState(() => _isLoading = true);
     try {
       final motors = await DatabaseHelper.instance.getAllMotorListings();
-      
+
       // Calculate distances
       final distances = <int, double?>{};
       for (final motor in motors) {
-        if (motor.id != null && motor.latitude != null && motor.longitude != null) {
+        if (motor.id != null &&
+            motor.latitude != null &&
+            motor.longitude != null) {
           final distance = await _lbsService.calculateDistanceToMotor(
             motor.latitude,
             motor.longitude,
@@ -60,7 +63,7 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
           distances[motor.id!] = distance;
         }
       }
-      
+
       if (!mounted) return;
       setState(() {
         _motors = motors;
@@ -68,17 +71,14 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
         _applyFiltersAndSort();
         _isLoading = false;
       });
-      
+
       _animationController.forward();
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -93,30 +93,34 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
 
   void _applyFiltersAndSort({String? searchQuery}) {
     var filtered = List<MotorListing>.from(_motors);
-    
+
     // Search filter
     final query = searchQuery ?? _searchController.text;
     if (query.isNotEmpty) {
-      filtered = filtered.where((motor) =>
-        motor.nama.toLowerCase().contains(query.toLowerCase()) ||
-        motor.brand.toLowerCase().contains(query.toLowerCase())).toList();
+      filtered = filtered
+          .where(
+            (motor) =>
+                motor.nama.toLowerCase().contains(query.toLowerCase()) ||
+                motor.brand.toLowerCase().contains(query.toLowerCase()),
+          )
+          .toList();
     }
-    
+
     // Brand filter
     if (_selectedBrand != null) {
       filtered = filtered.where((m) => m.brand == _selectedBrand).toList();
     }
-    
+
     // CC filter
     if (_selectedCC != null) {
       filtered = filtered.where((m) => m.cc == _selectedCC).toList();
     }
-    
+
     // Kondisi filter
     if (_selectedKondisi != null) {
       filtered = filtered.where((m) => m.kondisi == _selectedKondisi).toList();
     }
-    
+
     // Distance filter
     if (_selectedMaxDistance != null) {
       filtered = filtered.where((motor) {
@@ -125,7 +129,7 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
         return distance != null && distance <= _selectedMaxDistance!;
       }).toList();
     }
-    
+
     // Sorting
     switch (_sortBy) {
       case 'price_low':
@@ -145,7 +149,7 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
       default:
         break;
     }
-    
+
     setState(() {
       _filteredMotors = filtered;
     });
@@ -269,7 +273,10 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                 decoration: InputDecoration(
                   hintText: 'Search motorcycles...',
                   hintStyle: TextStyle(color: Colors.grey[600]),
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFF2196F3)),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Color(0xFF2196F3),
+                  ),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.tune, color: Color(0xFF2196F3)),
                     onPressed: _showFilterSheet,
@@ -289,10 +296,7 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                 const SizedBox(width: 8),
                 Text(
                   '${_filteredMotors.length} motorcycles available',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -310,22 +314,38 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: [
-            _buildSortChip('Newest', _sortBy == 'newest', () => setState(() {
-              _sortBy = 'newest';
-              _applyFiltersAndSort();
-            })),
-            _buildSortChip('Price: Low', _sortBy == 'price_low', () => setState(() {
-              _sortBy = 'price_low';
-              _applyFiltersAndSort();
-            })),
-            _buildSortChip('Price: High', _sortBy == 'price_high', () => setState(() {
-              _sortBy = 'price_high';
-              _applyFiltersAndSort();
-            })),
-            _buildSortChip('Nearest', _sortBy == 'distance', () => setState(() {
-              _sortBy = 'distance';
-              _applyFiltersAndSort();
-            })),
+            _buildSortChip(
+              'Newest',
+              _sortBy == 'newest',
+              () => setState(() {
+                _sortBy = 'newest';
+                _applyFiltersAndSort();
+              }),
+            ),
+            _buildSortChip(
+              'Price: Low',
+              _sortBy == 'price_low',
+              () => setState(() {
+                _sortBy = 'price_low';
+                _applyFiltersAndSort();
+              }),
+            ),
+            _buildSortChip(
+              'Price: High',
+              _sortBy == 'price_high',
+              () => setState(() {
+                _sortBy = 'price_high';
+                _applyFiltersAndSort();
+              }),
+            ),
+            _buildSortChip(
+              'Nearest',
+              _sortBy == 'distance',
+              () => setState(() {
+                _sortBy = 'distance';
+                _applyFiltersAndSort();
+              }),
+            ),
           ],
         ),
       ),
@@ -346,7 +366,9 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
           fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
         ),
         side: BorderSide(
-          color: selected ? const Color(0xFF2196F3) : Colors.white.withValues(alpha: 0.1),
+          color: selected
+              ? const Color(0xFF2196F3)
+              : Colors.white.withValues(alpha: 0.1),
         ),
       ),
     );
@@ -367,11 +389,19 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.motorcycle_outlined, size: 80, color: Colors.grey[700]),
+              Icon(
+                Icons.motorcycle_outlined,
+                size: 80,
+                color: Colors.grey[700],
+              ),
               const SizedBox(height: 16),
               Text(
                 'No motorcycles found',
-                style: TextStyle(fontSize: 18, color: Colors.grey[400], fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 8),
               TextButton(
@@ -396,20 +426,17 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final motor = _filteredMotors[index];
-            return _buildMotorCard(motor, index);
-          },
-          childCount: _filteredMotors.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final motor = _filteredMotors[index];
+          return _buildMotorCard(motor, index);
+        }, childCount: _filteredMotors.length),
       ),
     );
   }
 
   Widget _buildMotorCard(MotorListing motor, int index) {
     final distance = motor.id != null ? _motorDistances[motor.id] : null;
-    
+
     return TweenAnimationBuilder(
       duration: Duration(milliseconds: 300 + (index * 50)),
       tween: Tween<double>(begin: 0, end: 1),
@@ -427,10 +454,7 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF2196F3).withOpacity(0.05),
@@ -445,7 +469,9 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
             onTap: () async {
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => DetailMotorScreen(motorId: motor.id!)),
+                MaterialPageRoute(
+                  builder: (_) => DetailMotorScreen(motorId: motor.id!),
+                ),
               );
               _loadMotors();
             },
@@ -459,14 +485,17 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                     Hero(
                       tag: 'motor_${motor.id}',
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
                         child: motor.fotoPath1 != null
                             ? Image.file(
                                 File(motor.fotoPath1!),
                                 width: double.infinity,
                                 height: 200,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
+                                errorBuilder: (_, __, ___) =>
+                                    _buildPlaceholderImage(),
                               )
                             : _buildPlaceholderImage(),
                       ),
@@ -475,7 +504,9 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -492,7 +523,10 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                       top: 12,
                       left: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
@@ -523,7 +557,10 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                         top: 12,
                         right: 12,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(20),
@@ -535,7 +572,11 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.location_on, size: 14, color: Color(0xFF2196F3)),
+                              const Icon(
+                                Icons.location_on,
+                                size: 14,
+                                color: Color(0xFF2196F3),
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 _lbsService.formatDistance(distance),
@@ -554,9 +595,12 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                       bottom: 12,
                       left: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
-                          color: motor.kondisi == 'baru' 
+                          color: motor.kondisi == 'baru'
                               ? const Color(0xFF4CAF50).withOpacity(0.9)
                               : const Color(0xFFFF9800).withOpacity(0.9),
                           borderRadius: BorderRadius.circular(12),
@@ -598,9 +642,15 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                         children: [
                           _buildSpecBadge(Icons.speed, '${motor.cc}cc'),
                           const SizedBox(width: 12),
-                          _buildSpecBadge(Icons.calendar_today, '${motor.tahun}'),
+                          _buildSpecBadge(
+                            Icons.calendar_today,
+                            '${motor.tahun}',
+                          ),
                           const SizedBox(width: 12),
-                          _buildSpecBadge(Icons.settings, motor.kondisi == 'baru' ? 'Brand New' : 'Pre-owned'),
+                          _buildSpecBadge(
+                            Icons.settings,
+                            motor.kondisi == 'baru' ? 'Brand New' : 'Pre-owned',
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -642,7 +692,9 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF2196F3).withOpacity(0.3),
+                                  color: const Color(
+                                    0xFF2196F3,
+                                  ).withOpacity(0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -673,10 +725,7 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
       decoration: BoxDecoration(
         color: const Color(0xFF252525),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -709,10 +758,12 @@ class _MotorMarketplaceScreenState extends State<MotorMarketplaceScreen> with Si
   }
 
   String _formatPrice(double price) {
-    return price.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    );
+    return price
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
   }
 }
 
@@ -776,7 +827,11 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
             children: [
               const Text(
                 'Filters',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               TextButton(
                 onPressed: widget.onReset,
@@ -785,7 +840,10 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
             ],
           ),
           const SizedBox(height: 24),
-          const Text('Brand', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const Text(
+            'Brand',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -795,15 +853,21 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               return FilterChip(
                 label: Text(brand),
                 selected: selected,
-                onSelected: (value) => setState(() => _brand = value ? brand : null),
+                onSelected: (value) =>
+                    setState(() => _brand = value ? brand : null),
                 backgroundColor: const Color(0xFF121212),
                 selectedColor: const Color(0xFF2196F3),
-                labelStyle: TextStyle(color: selected ? Colors.white : Colors.grey[400]),
+                labelStyle: TextStyle(
+                  color: selected ? Colors.white : Colors.grey[400],
+                ),
               );
             }).toList(),
           ),
           const SizedBox(height: 24),
-          const Text('Engine CC', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const Text(
+            'Engine CC',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -816,12 +880,17 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                 onSelected: (value) => setState(() => _cc = value ? cc : null),
                 backgroundColor: const Color(0xFF121212),
                 selectedColor: const Color(0xFF2196F3),
-                labelStyle: TextStyle(color: selected ? Colors.white : Colors.grey[400]),
+                labelStyle: TextStyle(
+                  color: selected ? Colors.white : Colors.grey[400],
+                ),
               );
             }).toList(),
           ),
           const SizedBox(height: 24),
-          const Text('Condition', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const Text(
+            'Condition',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -829,7 +898,8 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                 child: FilterChip(
                   label: const Text('New'),
                   selected: _kondisi == 'baru',
-                  onSelected: (value) => setState(() => _kondisi = value ? 'baru' : null),
+                  onSelected: (value) =>
+                      setState(() => _kondisi = value ? 'baru' : null),
                   backgroundColor: const Color(0xFF121212),
                   selectedColor: const Color(0xFF2196F3),
                 ),
@@ -839,7 +909,8 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                 child: FilterChip(
                   label: const Text('Used'),
                   selected: _kondisi == 'bekas',
-                  onSelected: (value) => setState(() => _kondisi = value ? 'bekas' : null),
+                  onSelected: (value) =>
+                      setState(() => _kondisi = value ? 'bekas' : null),
                   backgroundColor: const Color(0xFF121212),
                   selectedColor: const Color(0xFF2196F3),
                 ),
@@ -847,7 +918,10 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
             ],
           ),
           const SizedBox(height: 24),
-          const Text('Max Distance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          const Text(
+            'Max Distance',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -856,17 +930,23 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               return FilterChip(
                 label: Text('${distance.toInt()}km'),
                 selected: selected,
-                onSelected: (value) => setState(() => _maxDistance = value ? distance : null),
+                onSelected: (value) =>
+                    setState(() => _maxDistance = value ? distance : null),
                 backgroundColor: const Color(0xFF121212),
                 selectedColor: const Color(0xFF2196F3),
-                labelStyle: TextStyle(color: selected ? Colors.white : Colors.grey[400]),
+                labelStyle: TextStyle(
+                  color: selected ? Colors.white : Colors.grey[400],
+                ),
               );
             }).toList(),
           ),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () => widget.onApply(_brand, _cc, _kondisi, _maxDistance),
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+            onPressed: () =>
+                widget.onApply(_brand, _cc, _kondisi, _maxDistance),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
             child: const Text('Apply Filters'),
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom),

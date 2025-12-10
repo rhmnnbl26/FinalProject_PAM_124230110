@@ -40,12 +40,22 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
     _brandController = TextEditingController(text: widget.motor.brand);
     _deskripsiController = TextEditingController(text: widget.motor.deskripsi);
     _ccController = TextEditingController(text: widget.motor.cc.toString());
-    _tahunController = TextEditingController(text: widget.motor.tahun.toString());
-    _hargaController = TextEditingController(text: widget.motor.hargaIdr.toString());
-    _kilometerController = TextEditingController(text: widget.motor.kilometer.toString());
+    _tahunController = TextEditingController(
+      text: widget.motor.tahun.toString(),
+    );
+    _hargaController = TextEditingController(
+      text: widget.motor.hargaIdr.toString(),
+    );
+    _kilometerController = TextEditingController(
+      text: widget.motor.kilometer.toString(),
+    );
     _lokasiController = TextEditingController(text: widget.motor.lokasi);
-    _instagramController = TextEditingController(text: widget.motor.instagramLink);
-    _kontakController = TextEditingController(text: widget.motor.kontakOpsional ?? '');
+    _instagramController = TextEditingController(
+      text: widget.motor.instagramLink,
+    );
+    _kontakController = TextEditingController(
+      text: widget.motor.kontakOpsional ?? '',
+    );
     _kondisi = widget.motor.kondisi;
 
     // Load existing photos
@@ -81,7 +91,7 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
 
       if (image != null) {
         final imageFile = File(image.path);
-        
+
         // Validate file size (max 5MB)
         final fileSize = await imageFile.length();
         if (fileSize > 5 * 1024 * 1024) {
@@ -92,7 +102,7 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
           }
           return;
         }
-        
+
         if (!mounted) return;
         setState(() {
           _selectedImages[index] = imageFile;
@@ -100,9 +110,9 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error memilih gambar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error memilih gambar: $e')));
       }
     }
   }
@@ -118,14 +128,14 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final motorImagesDir = Directory('${appDir.path}/motor_images');
-      
+
       if (!await motorImagesDir.exists()) {
         await motorImagesDir.create(recursive: true);
       }
 
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_$index.jpg';
       final savedImage = await image.copy('${motorImagesDir.path}/$fileName');
-      
+
       return savedImage.path;
     } catch (e) {
       print('Error saving image: $e');
@@ -193,9 +203,9 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error mengupdate motor: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error mengupdate motor: $e')));
       }
     }
   }
@@ -203,9 +213,7 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Motor'),
-      ),
+      appBar: AppBar(title: const Text('Edit Motor')),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -410,8 +418,9 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.link),
                 ),
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Link Instagram wajib diisi' : null,
+                validator: (value) => value?.isEmpty ?? true
+                    ? 'Link Instagram wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -446,4 +455,3 @@ class _EditMotorScreenState extends State<EditMotorScreen> {
     );
   }
 }
-

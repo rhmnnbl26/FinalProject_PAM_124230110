@@ -43,16 +43,16 @@ class VoucherService {
   Future<bool> canShakeToday() async {
     final prefs = await SharedPreferences.getInstance();
     final lastShakeStr = prefs.getString(_lastShakeKey);
-    
+
     if (lastShakeStr == null) return true;
-    
+
     final lastShake = DateTime.parse(lastShakeStr);
     final now = DateTime.now();
-    
+
     // Cek apakah sudah berbeda hari
     return lastShake.year != now.year ||
-           lastShake.month != now.month ||
-           lastShake.day != now.day;
+        lastShake.month != now.month ||
+        lastShake.day != now.day;
   }
 
   /// Cek apakah user dalam radius yang diperbolehkan
@@ -69,10 +69,10 @@ class VoucherService {
   }) {
     final random = Random();
     final randomValue = random.nextInt(100); // 0-99
-    
+
     int cumulativeProbability = 0;
     Map<String, dynamic>? selectedTemplate;
-    
+
     for (var template in _voucherTemplates) {
       cumulativeProbability += template['probability'] as int;
       if (randomValue < cumulativeProbability) {
@@ -80,17 +80,17 @@ class VoucherService {
         break;
       }
     }
-    
+
     // Fallback (seharusnya tidak terjadi)
     selectedTemplate ??= _voucherTemplates[0];
-    
+
     // Generate unique code
     final code = _generateVoucherCode();
-    
+
     // Set expiry date (30 hari dari sekarang)
     final now = DateTime.now();
     final expiryDate = now.add(const Duration(days: 30));
-    
+
     return Voucher(
       code: code,
       title: selectedTemplate['title'],
@@ -109,7 +109,8 @@ class VoucherService {
   String _generateVoucherCode() {
     final random = Random();
     final now = DateTime.now();
-    final dateCode = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final dateCode =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     final randomCode = random.nextInt(9999).toString().padLeft(4, '0');
     return 'MOTOR-$dateCode-$randomCode';
   }
@@ -118,11 +119,11 @@ class VoucherService {
   Future<Voucher> saveVoucher(Voucher voucher) async {
     // Simpan ke database
     final id = await DatabaseHelper.instance.insertVoucher(voucher);
-    
+
     // Update last shake date
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_lastShakeKey, DateTime.now().toIso8601String());
-    
+
     return voucher.copyWith(id: id);
   }
 
@@ -152,12 +153,16 @@ class VoucherService {
   Future<Duration?> getTimeUntilNextShake() async {
     final lastShake = await getLastShakeDate();
     if (lastShake == null) return null;
-    
+
     final now = DateTime.now();
-    final nextShake = DateTime(lastShake.year, lastShake.month, lastShake.day + 1);
-    
+    final nextShake = DateTime(
+      lastShake.year,
+      lastShake.month,
+      lastShake.day + 1,
+    );
+
     if (now.isAfter(nextShake)) return null;
-    
+
     return nextShake.difference(now);
   }
 }

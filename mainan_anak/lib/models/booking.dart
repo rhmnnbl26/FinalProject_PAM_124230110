@@ -97,7 +97,9 @@ class Booking {
       bookingCode: map['booking_code'],
       qrCodeData: map['qr_code_data'],
       createdAt: DateTime.parse(map['created_at']),
-      updatedAt: map['updated_at'] != null ? DateTime.parse(map['updated_at']) : null,
+      updatedAt: map['updated_at'] != null
+          ? DateTime.parse(map['updated_at'])
+          : null,
     );
   }
 

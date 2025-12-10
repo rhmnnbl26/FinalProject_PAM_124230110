@@ -6,14 +6,14 @@ import 'package:intl/intl.dart';
 
 class BookingService {
   static final BookingService instance = BookingService._init();
-  
+
   BookingService._init();
 
   // Service prices for big motorcycles (≥1000cc)
   static const Map<String, double> servicePrices = {
-    'ringan': 500000,  // Rp 500.000
+    'ringan': 500000, // Rp 500.000
     'sedang': 1000000, // Rp 1.000.000
-    'besar': 2000000,  // Rp 2.000.000
+    'besar': 2000000, // Rp 2.000.000
   };
 
   /// Get service price by type
@@ -38,21 +38,22 @@ class BookingService {
     int? discountPercent,
   }) async {
     final db = DatabaseHelper.instance;
-    
+
     // Generate booking code and queue number
     final bookingCode = await db.generateBookingCode();
     final queueNumber = await db.generateQueueNumber(bookingDate);
-    
+
     // Calculate prices
     final originalPrice = getServicePrice(serviceType);
-    final discountAmount = discountPercent != null 
-        ? (originalPrice * discountPercent / 100) 
+    final discountAmount = discountPercent != null
+        ? (originalPrice * discountPercent / 100)
         : 0.0;
     final finalPrice = originalPrice - discountAmount;
-    
+
     // Generate QR code data
-    final qrCodeData = '$bookingCode|$queueNumber|$bookingDate|$bookingTimeSlot';
-    
+    final qrCodeData =
+        '$bookingCode|$queueNumber|$bookingDate|$bookingTimeSlot';
+
     // Create booking map
     final bookingMap = {
       'user_id': userId,
@@ -76,19 +77,19 @@ class BookingService {
       'qr_code_data': qrCodeData,
       'created_at': DateTime.now().toIso8601String(),
     };
-    
+
     // Insert booking
     final bookingId = await db.insertBooking(bookingMap);
-    
+
     // Book the slot
     await db.bookSlot(bengkelId, bookingDate, bookingTimeSlot);
-    
+
     // Create booking object
     final booking = Booking.fromMap({...bookingMap, 'id': bookingId});
-    
+
     // Send notification
     await _sendBookingNotification(booking);
-    
+
     return booking;
   }
 
@@ -111,11 +112,11 @@ class BookingService {
   Future<void> cancelBooking(int bookingId) async {
     final db = DatabaseHelper.instance;
     final booking = await getBookingById(bookingId);
-    
+
     if (booking != null) {
       // Update booking status
       await db.updateBookingStatus(bookingId, 'cancelled');
-      
+
       // Release the slot
       await db.releaseSlot(
         booking.bengkelId,
@@ -126,7 +127,10 @@ class BookingService {
   }
 
   /// Get available slots for a specific date
-  Future<List<BookingSlot>> getAvailableSlots(int bengkelId, String date) async {
+  Future<List<BookingSlot>> getAvailableSlots(
+    int bengkelId,
+    String date,
+  ) async {
     final db = DatabaseHelper.instance;
     final slotMaps = await db.getAvailableSlots(bengkelId, date);
     return slotMaps.map((map) => BookingSlot.fromMap(map)).toList();
@@ -135,8 +139,10 @@ class BookingService {
   /// Send booking notification
   Future<void> _sendBookingNotification(Booking booking) async {
     final dateFormat = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
-    final formattedDate = dateFormat.format(DateTime.parse(booking.bookingDate));
-    
+    final formattedDate = dateFormat.format(
+      DateTime.parse(booking.bookingDate),
+    );
+
     await LocalNotificationService.instance.showBookingNotification(
       motorName: '${booking.motorMerk} ${booking.motorTipe}',
       serviceType: booking.serviceTypeName,

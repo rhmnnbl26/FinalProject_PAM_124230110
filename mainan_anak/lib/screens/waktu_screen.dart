@@ -36,9 +36,7 @@ class _WaktuScreenState extends State<WaktuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Konversi Waktu'),
-      ),
+      appBar: AppBar(title: const Text('Konversi Waktu')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -60,10 +58,7 @@ class _WaktuScreenState extends State<WaktuScreen> {
                     const SizedBox(height: 16),
                     const Text(
                       'Waktu Saat Ini',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -125,9 +120,7 @@ class _WaktuScreenState extends State<WaktuScreen> {
   ) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -157,10 +150,7 @@ class _WaktuScreenState extends State<WaktuScreen> {
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
                   Text(

@@ -19,7 +19,8 @@ class DetailMotorScreen extends StatefulWidget {
   State<DetailMotorScreen> createState() => _DetailMotorScreenState();
 }
 
-class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTickerProviderStateMixin {
+class _DetailMotorScreenState extends State<DetailMotorScreen>
+    with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final AuthService _authService = AuthService();
   final LbsService _lbsService = LbsService();
@@ -66,7 +67,10 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
   }
 
   Future<void> _checkFavorite(int userId) async {
-    final isFav = await DatabaseHelper.instance.isFavorite(userId, widget.motorId);
+    final isFav = await DatabaseHelper.instance.isFavorite(
+      userId,
+      widget.motorId,
+    );
     if (!mounted) return;
     setState(() {
       _isFavorite = isFav;
@@ -77,9 +81,11 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
     if (!mounted) return;
     setState(() => _isLoading = true);
     try {
-      final motor = await DatabaseHelper.instance.getMotorListingById(widget.motorId);
+      final motor = await DatabaseHelper.instance.getMotorListingById(
+        widget.motorId,
+      );
       final rates = await _apiService.getExchangeRates();
-      
+
       // Calculate distance if motor has location
       double? distance;
       if (motor?.latitude != null && motor?.longitude != null) {
@@ -88,7 +94,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
           motor.longitude,
         );
       }
-      
+
       if (!mounted) return;
       setState(() {
         _motor = motor;
@@ -101,9 +107,9 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading motor: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading motor: $e')));
       }
     }
   }
@@ -120,26 +126,29 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
 
     try {
       String urlString = _motor!.instagramLink.trim();
-      
+
       // Pastikan URL memiliki scheme
-      if (!urlString.startsWith('http://') && !urlString.startsWith('https://')) {
+      if (!urlString.startsWith('http://') &&
+          !urlString.startsWith('https://')) {
         urlString = 'https://$urlString';
       }
-      
+
       final url = Uri.parse(urlString);
-      
+
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error membuka link: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error membuka link: $e')));
       }
     }
   }
 
   Future<void> _openInGoogleMaps() async {
-    if (_motor == null || _motor!.latitude == null || _motor!.longitude == null) {
+    if (_motor == null ||
+        _motor!.latitude == null ||
+        _motor!.longitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lokasi motor tidak tersedia')),
       );
@@ -148,9 +157,9 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
 
     try {
       final url = Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=${_motor!.latitude},${_motor!.longitude}'
+        'https://www.google.com/maps/search/?api=1&query=${_motor!.latitude},${_motor!.longitude}',
       );
-      
+
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
@@ -166,9 +175,15 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
 
     try {
       if (_isFavorite) {
-        await DatabaseHelper.instance.removeFavorite(_currentUserId!, widget.motorId);
+        await DatabaseHelper.instance.removeFavorite(
+          _currentUserId!,
+          widget.motorId,
+        );
       } else {
-        await DatabaseHelper.instance.addFavorite(_currentUserId!, widget.motorId);
+        await DatabaseHelper.instance.addFavorite(
+          _currentUserId!,
+          widget.motorId,
+        );
       }
       if (!mounted) return;
       setState(() {
@@ -177,23 +192,23 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isFavorite ? 'Ditambahkan ke favorit' : 'Dihapus dari favorit'),
+          content: Text(
+            _isFavorite ? 'Ditambahkan ke favorit' : 'Dihapus dari favorit',
+          ),
           duration: const Duration(seconds: 1),
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
   Future<void> _editMotor() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => EditMotorScreen(motor: _motor!),
-      ),
+      MaterialPageRoute(builder: (_) => EditMotorScreen(motor: _motor!)),
     );
 
     if (result == true) {
@@ -235,9 +250,9 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error menghapus motor: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error menghapus motor: $e')));
         }
       }
     }
@@ -245,9 +260,10 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    final bool isOwner = _currentUserId != null && 
-                          _motor?.userId != null && 
-                          _currentUserId == _motor!.userId;
+    final bool isOwner =
+        _currentUserId != null &&
+        _motor?.userId != null &&
+        _currentUserId == _motor!.userId;
 
     return Scaffold(
       appBar: AppBar(
@@ -299,89 +315,92 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _motor == null
-              ? const Center(child: Text('Motor tidak ditemukan'))
-              : FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildPhotoSection(),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _motor!.nama,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+          ? const Center(child: Text('Motor tidak ditemukan'))
+          : FadeTransition(
+              opacity: _fadeAnimation,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPhotoSection(),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _motor!.nama,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _motor!.brand,
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey[600],
-                              ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _motor!.brand,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[600],
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildPriceCard(),
+                          const SizedBox(height: 16),
+                          _buildSpecsCard(),
+                          const SizedBox(height: 16),
+                          _buildDescriptionCard(),
+                          const SizedBox(height: 16),
+                          _buildLocationCard(),
+                          if (_motor!.latitude != null &&
+                              _motor!.longitude != null) ...[
                             const SizedBox(height: 16),
-                            _buildPriceCard(),
-                            const SizedBox(height: 16),
-                            _buildSpecsCard(),
-                            const SizedBox(height: 16),
-                            _buildDescriptionCard(),
-                            const SizedBox(height: 16),
-                            _buildLocationCard(),
-                            if (_motor!.latitude != null && _motor!.longitude != null) ...[
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: OutlinedButton.icon(
-                                  onPressed: _openInGoogleMaps,
-                                  icon: const Icon(Icons.map),
-                                  label: const Text('Lihat Lokasi di Google Maps'),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.blue,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            if (_motor!.kontakOpsional != null &&
-                                _motor!.kontakOpsional!.isNotEmpty) ...[
-                              const SizedBox(height: 16),
-                              _buildContactCard(),
-                            ],
-                            const SizedBox(height: 24),
                             SizedBox(
                               width: double.infinity,
                               height: 50,
-                              child: ElevatedButton.icon(
-                                onPressed: _openInstagram,
-                                icon: const Icon(Icons.shopping_cart),
-                                label: const Text('Beli via Instagram'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2196F3),
-                                  foregroundColor: Colors.white,
+                              child: OutlinedButton.icon(
+                                onPressed: _openInGoogleMaps,
+                                icon: const Icon(Icons.map),
+                                label: const Text(
+                                  'Lihat Lokasi di Google Maps',
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.blue,
                                 ),
                               ),
                             ),
                           ],
-                        ),
+                          if (_motor!.kontakOpsional != null &&
+                              _motor!.kontakOpsional!.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            _buildContactCard(),
+                          ],
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton.icon(
+                              onPressed: _openInstagram,
+                              icon: const Icon(Icons.shopping_cart),
+                              label: const Text('Beli via Instagram'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2196F3),
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                ),
+              ),
+            ),
     );
   }
 
   Widget _buildPhotoSection() {
     final photos = _motor!.allPhotos;
-    
+
     if (photos.isEmpty) {
       return Container(
         height: 300,
@@ -443,7 +462,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
 
   Widget _buildPriceCard() {
     final convertedPrice = _convertPrice(_motor!.hargaIdr);
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -451,10 +470,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Harga',
-              style: TextStyle(fontSize: 16),
-            ),
+            const Text('Harga', style: TextStyle(fontSize: 16)),
             Text(
               CurrencyHelper.formatCurrency(convertedPrice, _selectedCurrency),
               style: const TextStyle(
@@ -499,10 +515,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(color: Colors.grey[600])),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -533,7 +546,7 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
 
   Widget _buildLocationCard() {
     final distanceText = _lbsService.formatDistance(_distanceToMotor);
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -585,14 +598,10 @@ class _DetailMotorScreenState extends State<DetailMotorScreen> with SingleTicker
           children: [
             const Icon(Icons.phone, color: Colors.blue),
             const SizedBox(width: 8),
-            Text(
-              _motor!.kontakOpsional!,
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(_motor!.kontakOpsional!, style: const TextStyle(fontSize: 14)),
           ],
         ),
       ),
     );
   }
 }
-

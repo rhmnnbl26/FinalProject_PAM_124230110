@@ -130,7 +130,10 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
               itemBuilder: (context, index) {
                 final banner = _banners[index];
                 return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: banner['gradient'] as List<Color>,
@@ -140,7 +143,8 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: (banner['gradient'] as List<Color>)[0].withValues(alpha: 0.3),
+                        color: (banner['gradient'] as List<Color>)[0]
+                            .withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -267,45 +271,44 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
           mainAxisSpacing: 16,
           childAspectRatio: 0.85,
         ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final item = menuItems[index];
-            return _buildNavigationCard(
-              title: item['title'] as String,
-              subtitle: item['subtitle'] as String,
-              icon: item['icon'] as IconData,
-              gradient: item['gradient'] as List<Color>,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        item['route'] as Widget,
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.easeInOut;
-                      
-                      var tween = Tween(begin: begin, end: end).chain(
-                        CurveTween(curve: curve),
-                      );
-                      var offsetAnimation = animation.drive(tween);
-                      
-                      return SlideTransition(
-                        position: offsetAnimation,
-                        child: FadeTransition(
-                          opacity: animation,
-                          child: child,
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            );
-          },
-          childCount: menuItems.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final item = menuItems[index];
+          return _buildNavigationCard(
+            title: item['title'] as String,
+            subtitle: item['subtitle'] as String,
+            icon: item['icon'] as IconData,
+            gradient: item['gradient'] as List<Color>,
+            onTap: () {
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      item['route'] as Widget,
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.easeInOut;
+
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        var offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
+                ),
+              );
+            },
+          );
+        }, childCount: menuItems.length),
       ),
     );
   }
@@ -361,11 +364,7 @@ class _HomeNewScreenState extends State<HomeNewScreen> {
                       ),
                     ],
                   ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 32,
-                  ),
+                  child: Icon(icon, color: Colors.white, size: 32),
                 ),
                 const Spacer(),
                 Text(

@@ -29,9 +29,17 @@ class Aksesoris {
       name: json['name'] as String? ?? '',
       brand: json['brand'] as String? ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      imageUrl: (json['imageUrl'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      imageUrl:
+          (json['imageUrl'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       category: json['category'] as String? ?? '',
-      compatibility: (json['compatibility'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      compatibility:
+          (json['compatibility'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       stock: (json['stock'] as num?)?.toInt() ?? 0,
       description: json['description'] as String? ?? '',
       linkUrl: json['linkUrl'] as String? ?? '',

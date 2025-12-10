@@ -16,7 +16,8 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
   final AuthService _authService = AuthService();
   final ImagePicker _picker = ImagePicker();
   String _username = '';
@@ -417,7 +418,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           ? FileImage(_profileImage!)
                           : null,
                       child: _profileImage == null
-                          ? const Icon(Icons.person, size: 60, color: Colors.white)
+                          ? const Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.white,
+                            )
                           : null,
                     ),
                     Positioned(
@@ -446,143 +451,142 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               const SizedBox(height: 16),
               Text(
                 _username,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 32),
 
-            // Menu items
-            ListTile(
-              leading: const Icon(Icons.favorite),
-              title: const Text('Motor Favorit'),
-              subtitle: const Text('Lihat motor yang Anda favoritkan'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FavoritesScreen()),
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.access_time),
-              title: const Text('Konversi Waktu'),
-              subtitle: const Text('WIB, WITA, WIT, London'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const WaktuScreen()),
-                );
-              },
-            ),
-            const Divider(),
-
-            // Test Notifications
-            ListTile(
-              leading: const Icon(
-                Icons.notifications_active,
-                color: Colors.orange,
+              // Menu items
+              ListTile(
+                leading: const Icon(Icons.favorite),
+                title: const Text('Motor Favorit'),
+                subtitle: const Text('Lihat motor yang Anda favoritkan'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+                  );
+                },
               ),
-              title: const Text('Test Notifikasi'),
-              subtitle: const Text('Coba kirim notifikasi test'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: _showTestNotificationDialog,
-            ),
-            const Divider(),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.access_time),
+                title: const Text('Konversi Waktu'),
+                subtitle: const Text('WIB, WITA, WIT, London'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WaktuScreen()),
+                  );
+                },
+              ),
+              const Divider(),
 
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.school,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Saran & Kesan',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+              // Test Notifications
+              ListTile(
+                leading: const Icon(
+                  Icons.notifications_active,
+                  color: Colors.orange,
+                ),
+                title: const Text('Test Notifikasi'),
+                subtitle: const Text('Coba kirim notifikasi test'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: _showTestNotificationDialog,
+              ),
+              const Divider(),
+
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.school,
+                              color: Theme.of(context).primaryColor,
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Mata Kuliah: Pemrograman Aplikasi Mobile',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Saran & Kesan',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Kesan:\n'
-                        'Mata kuliah PAM sangat menarik dan memberikan pengalaman '
-                        'praktis dalam pengembangan aplikasi mobile menggunakan Flutter. '
-                        'Materi yang diajarkan sangat relevan dengan kebutuhan industri saat ini.',
-                        style: TextStyle(fontSize: 14, height: 1.5),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Saran:\n'
-                        'Lebih banyak studi kasus dan project-based learning akan '
-                        'sangat membantu dalam memahami konsep-konsep yang lebih kompleks. '
-                        'Penambahan materi tentang state management dan testing juga akan sangat bermanfaat.',
-                        style: TextStyle(fontSize: 14, height: 1.5),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Mata Kuliah: Pemrograman Aplikasi Mobile',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Kesan:\n'
+                          'Terimakasih saya ucapkan kepada yang mulia bapak bagus karena telah memberikan pengalaman yang sangat menarik selama mengikuti mata kuliah ini. terlepas dari banyak nya shock terapi yang bapak berikan saya menyadari itu sangat bermanfaat buat saya, saya menyadari kekurangan saya, saya menyadari apa yang bisa saya lakukan terima kasih bapak ',
+                          style: TextStyle(fontSize: 14, height: 1.5),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Saran:\n'
+                          'Kurang kurangin shock terapinya pak, soalnya saya jadi stress sendiri kalo dapet tugas dari bapak hehe. Terimakasih pak.',
+                          style: TextStyle(fontSize: 14, height: 1.5),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: _logout,
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Logout'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: _logout,
+                        icon: const Icon(Icons.logout),
+                        label: const Text('Logout'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: OutlinedButton.icon(
-                      onPressed: _deleteAccount,
-                      icon: const Icon(Icons.delete_forever),
-                      label: const Text('Hapus Akun'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red, width: 2),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        onPressed: _deleteAccount,
+                        icon: const Icon(Icons.delete_forever),
+                        label: const Text('Hapus Akun'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red, width: 2),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
+              const SizedBox(height: 32),
             ],
           ),
         ),

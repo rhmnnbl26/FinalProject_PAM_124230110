@@ -25,11 +25,19 @@ class MotorBaru {
     // Handle both 'image' and 'im ge' typo in API
     List<String> imageList = [];
     if (json['image'] != null) {
-      imageList = (json['image'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+      imageList =
+          (json['image'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [];
     } else if (json['im ge'] != null) {
-      imageList = (json['im ge'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+      imageList =
+          (json['im ge'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [];
     }
-    
+
     return MotorBaru(
       id: json['id'].toString(),
       model: json['model'] as String? ?? '',

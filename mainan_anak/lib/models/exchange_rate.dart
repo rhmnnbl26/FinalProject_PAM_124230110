@@ -3,11 +3,7 @@ class ExchangeRate {
   final double eur;
   final double jpy;
 
-  ExchangeRate({
-    required this.usd,
-    required this.eur,
-    required this.jpy,
-  });
+  ExchangeRate({required this.usd, required this.eur, required this.jpy});
 
   factory ExchangeRate.fromJson(Map<String, dynamic> json) {
     final rates = json['rates'] as Map<String, dynamic>;

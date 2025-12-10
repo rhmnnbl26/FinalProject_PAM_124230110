@@ -13,7 +13,8 @@ class FavoritesScreen extends StatefulWidget {
   State<FavoritesScreen> createState() => _FavoritesScreenState();
 }
 
-class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProviderStateMixin {
+class _FavoritesScreenState extends State<FavoritesScreen>
+    with SingleTickerProviderStateMixin {
   List<MotorListing> _favoriteMotors = [];
   bool _isLoading = true;
   final AuthService _authService = AuthService();
@@ -43,12 +44,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
     try {
       final userId = await _authService.getCurrentUserId();
       if (userId != null) {
-        final favorites = await DatabaseHelper.instance.getFavoriteMotors(userId);
-        
+        final favorites = await DatabaseHelper.instance.getFavoriteMotors(
+          userId,
+        );
+
         // Calculate distances
         final distances = <int, double?>{};
         for (final motor in favorites) {
-          if (motor.id != null && motor.latitude != null && motor.longitude != null) {
+          if (motor.id != null &&
+              motor.latitude != null &&
+              motor.longitude != null) {
             final distance = await _lbsService.calculateDistanceToMotor(
               motor.latitude,
               motor.longitude,
@@ -56,7 +61,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
             distances[motor.id!] = distance;
           }
         }
-        
+
         if (!mounted) return;
         setState(() {
           _favoriteMotors = favorites;
@@ -72,9 +77,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading favorites: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading favorites: $e')));
       }
     }
   }
@@ -82,55 +87,50 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Motor Favorit'),
-      ),
+      appBar: AppBar(title: const Text('Motor Favorit')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _favoriteMotors.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.favorite_border,
-                          size: 80, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada motor favorit',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tambahkan motor ke favorit dari halaman detail',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.favorite_border,
+                    size: 80,
+                    color: Colors.grey[400],
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadFavorites,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _favoriteMotors.length,
-                    itemBuilder: (context, index) {
-                      final motor = _favoriteMotors[index];
-                      return _buildDismissibleMotorCard(motor, index);
-                    },
+                  const SizedBox(height: 16),
+                  Text(
+                    'Belum ada motor favorit',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tambahkan motor ke favorit dari halaman detail',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadFavorites,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _favoriteMotors.length,
+                itemBuilder: (context, index) {
+                  final motor = _favoriteMotors[index];
+                  return _buildDismissibleMotorCard(motor, index);
+                },
+              ),
+            ),
     );
   }
 
   Widget _buildDismissibleMotorCard(MotorListing motor, int index) {
     final distance = motor.id != null ? _motorDistances[motor.id] : null;
-    
+
     return Dismissible(
       key: Key('motor_${motor.id}_$index'),
       direction: DismissDirection.endToStart,
@@ -216,11 +216,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.delete_outline,
-              color: Colors.white,
-              size: 32,
-            ),
+            Icon(Icons.delete_outline, color: Colors.white, size: 32),
             SizedBox(height: 4),
             Text(
               'Hapus',
@@ -277,7 +273,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
                               width: 110,
                               height: 110,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
+                              errorBuilder: (_, __, ___) =>
+                                  _buildPlaceholderImage(),
                             )
                           : _buildPlaceholderImage(),
                     ),
@@ -318,9 +315,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
                           horizontal: 8,
                           vertical: 4,
                         ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3).withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2196F3).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           motor.brand,
@@ -348,11 +345,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
                       // Specs
                       Row(
                         children: [
-                          Icon(
-                            Icons.speed,
-                            size: 14,
-                            color: Colors.grey[500],
-                          ),
+                          Icon(Icons.speed, size: 14, color: Colors.grey[500]),
                           const SizedBox(width: 4),
                           Text(
                             '${motor.cc}cc',
@@ -426,19 +419,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> with SingleTickerProv
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(
-        Icons.motorcycle,
-        size: 50,
-        color: Colors.grey[700],
-      ),
+      child: Icon(Icons.motorcycle, size: 50, color: Colors.grey[700]),
     );
   }
 
   String _formatPrice(double price) {
-    return price.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    );
+    return price
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
   }
 }
-

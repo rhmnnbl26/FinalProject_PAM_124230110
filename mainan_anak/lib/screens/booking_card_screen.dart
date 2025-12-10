@@ -15,7 +15,10 @@ class BookingCardScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF252525),
-        title: const Text('Batalkan Booking?', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Batalkan Booking?',
+          style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
           'Apakah Anda yakin ingin membatalkan booking ini?',
           style: TextStyle(color: Colors.white70),
@@ -48,9 +51,9 @@ class BookingCardScreen extends StatelessWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: $e')));
         }
       }
     }
@@ -59,7 +62,9 @@ class BookingCardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
-    final formattedDate = dateFormat.format(DateTime.parse(booking.bookingDate));
+    final formattedDate = dateFormat.format(
+      DateTime.parse(booking.bookingDate),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -90,11 +95,19 @@ class BookingCardScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(20),
                     child: const Row(
                       children: [
-                        Icon(Icons.confirmation_number, color: Colors.white, size: 32),
+                        Icon(
+                          Icons.confirmation_number,
+                          color: Colors.white,
+                          size: 32,
+                        ),
                         SizedBox(width: 12),
                         Text(
                           'KARTU BOOKING SERVIS',
-                          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -112,11 +125,22 @@ class BookingCardScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Bengkel Motor Rumah', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text(
+                          'Bengkel Motor Rumah',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        const Text('📍 Jl. Contoh No. 123, Yogyakarta', style: TextStyle(color: Colors.black54)),
+                        const Text(
+                          '📍 Jl. Contoh No. 123, Yogyakarta',
+                          style: TextStyle(color: Colors.black54),
+                        ),
                         const Divider(height: 32),
-                        Text('🏍️  Motor: ${booking.motorMerk} ${booking.motorTipe}'),
+                        Text(
+                          '🏍️  Motor: ${booking.motorMerk} ${booking.motorTipe}',
+                        ),
                         const SizedBox(height: 8),
                         Text('📝  Plat: ${booking.motorPlat}'),
                         const SizedBox(height: 8),
@@ -126,18 +150,40 @@ class BookingCardScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text('⏰  Waktu: ${booking.bookingTimeSlot} WIB'),
                         const SizedBox(height: 8),
-                        Text('🎟️  No. Antrian: ${booking.queueNumber}', 
-                          style: const TextStyle(color: Color(0xFF2196F3), fontWeight: FontWeight.bold)),
+                        Text(
+                          '🎟️  No. Antrian: ${booking.queueNumber}',
+                          style: const TextStyle(
+                            color: Color(0xFF2196F3),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const Divider(height: 32),
-                        Text('💰  Total Bayar: ${BookingService.instance.formatCurrency(booking.finalPrice)}',
-                          style: const TextStyle(color: Color(0xFF2196F3), fontWeight: FontWeight.bold)),
+                        Text(
+                          '💰  Total Bayar: ${BookingService.instance.formatCurrency(booking.finalPrice)}',
+                          style: const TextStyle(
+                            color: Color(0xFF2196F3),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         if (booking.discountAmount > 0)
-                          Text('Hemat ${BookingService.instance.formatCurrency(booking.discountAmount)}',
-                            style: const TextStyle(color: Colors.green, fontSize: 12)),
-                        if (booking.notes != null && booking.notes!.isNotEmpty) ...[
+                          Text(
+                            'Hemat ${BookingService.instance.formatCurrency(booking.discountAmount)}',
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 12,
+                            ),
+                          ),
+                        if (booking.notes != null &&
+                            booking.notes!.isNotEmpty) ...[
                           const Divider(height: 32),
-                          const Text('📌  Catatan:', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text(booking.notes!, style: const TextStyle(color: Colors.black54)),
+                          const Text(
+                            '📌  Catatan:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            booking.notes!,
+                            style: const TextStyle(color: Colors.black54),
+                          ),
                         ],
                         const Divider(height: 32),
                         Center(
@@ -148,12 +194,29 @@ class BookingCardScreen extends StatelessWidget {
                                 size: 200,
                               ),
                               const SizedBox(height: 12),
-                              const Text('Scan saat datang ke bengkel',
-                                style: TextStyle(color: Colors.black45, fontSize: 12, fontStyle: FontStyle.italic)),
+                              const Text(
+                                'Scan saat datang ke bengkel',
+                                style: TextStyle(
+                                  color: Colors.black45,
+                                  fontSize: 12,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
                               const SizedBox(height: 24),
-                              const Text('Kode Booking', style: TextStyle(color: Colors.black54, fontSize: 12)),
-                              Text(booking.bookingCode,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Kode Booking',
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                booking.bookingCode,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -183,4 +246,3 @@ class BookingCardScreen extends StatelessWidget {
     );
   }
 }
-

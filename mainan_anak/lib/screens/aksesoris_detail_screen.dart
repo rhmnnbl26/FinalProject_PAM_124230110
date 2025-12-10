@@ -59,16 +59,17 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
   Future<void> _openLink(String url) async {
     try {
       String urlString = url.trim();
-      if (!urlString.startsWith('http://') && !urlString.startsWith('https://')) {
+      if (!urlString.startsWith('http://') &&
+          !urlString.startsWith('https://')) {
         urlString = 'https://$urlString';
       }
       final uri = Uri.parse(urlString);
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error membuka link: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error membuka link: $e')));
       }
     }
   }
@@ -76,13 +77,27 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isApparel = widget.isApparel;
-    final name = isApparel ? (widget.item as Apparel).name : (widget.item as Aksesoris).name;
-    final brand = isApparel ? (widget.item as Apparel).brand : (widget.item as Aksesoris).brand;
-    final price = isApparel ? (widget.item as Apparel).price : (widget.item as Aksesoris).price;
-    final images = isApparel ? (widget.item as Apparel).imageUrl : (widget.item as Aksesoris).imageUrl;
-    final description = isApparel ? (widget.item as Apparel).description : (widget.item as Aksesoris).description;
-    final stock = isApparel ? (widget.item as Apparel).stock : (widget.item as Aksesoris).stock;
-    final linkUrl = isApparel ? (widget.item as Apparel).linkUrl : (widget.item as Aksesoris).linkUrl;
+    final name = isApparel
+        ? (widget.item as Apparel).name
+        : (widget.item as Aksesoris).name;
+    final brand = isApparel
+        ? (widget.item as Apparel).brand
+        : (widget.item as Aksesoris).brand;
+    final price = isApparel
+        ? (widget.item as Apparel).price
+        : (widget.item as Aksesoris).price;
+    final images = isApparel
+        ? (widget.item as Apparel).imageUrl
+        : (widget.item as Aksesoris).imageUrl;
+    final description = isApparel
+        ? (widget.item as Apparel).description
+        : (widget.item as Aksesoris).description;
+    final stock = isApparel
+        ? (widget.item as Apparel).stock
+        : (widget.item as Aksesoris).stock;
+    final linkUrl = isApparel
+        ? (widget.item as Apparel).linkUrl
+        : (widget.item as Aksesoris).linkUrl;
 
     return Scaffold(
       appBar: AppBar(
@@ -143,7 +158,8 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
                   _buildStockCard(stock),
                   const SizedBox(height: 16),
                   if (isApparel) _buildApparelSpecs(widget.item as Apparel),
-                  if (!isApparel) _buildAksesorisSpecs(widget.item as Aksesoris),
+                  if (!isApparel)
+                    _buildAksesorisSpecs(widget.item as Aksesoris),
                   const SizedBox(height: 16),
                   _buildDescriptionCard(description),
                   const SizedBox(height: 24),
@@ -210,7 +226,7 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
                         child: CircularProgressIndicator(
                           value: loadingProgress.expectedTotalBytes != null
                               ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
+                                    loadingProgress.expectedTotalBytes!
                               : null,
                         ),
                       ),
@@ -249,7 +265,7 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
 
   Widget _buildPriceCard(double price) {
     final convertedPrice = _convertPrice(price);
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -257,10 +273,7 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Harga',
-              style: TextStyle(fontSize: 16),
-            ),
+            const Text('Harga', style: TextStyle(fontSize: 16)),
             _isLoadingRates
                 ? const SizedBox(
                     width: 20,
@@ -268,7 +281,10 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    CurrencyHelper.formatCurrency(convertedPrice, _selectedCurrency),
+                    CurrencyHelper.formatCurrency(
+                      convertedPrice,
+                      _selectedCurrency,
+                    ),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -333,7 +349,9 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
               children: apparel.size.map((size) {
                 return Chip(
                   label: Text(size),
-                  backgroundColor: const Color(0xFF2196F3).withValues(alpha: 0.2),
+                  backgroundColor: const Color(
+                    0xFF2196F3,
+                  ).withValues(alpha: 0.2),
                 );
               }).toList(),
             ),
@@ -388,10 +406,7 @@ class _AksesorisDetailScreenState extends State<AksesorisDetailScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(color: Colors.grey[600])),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
         ],
       ),
     );

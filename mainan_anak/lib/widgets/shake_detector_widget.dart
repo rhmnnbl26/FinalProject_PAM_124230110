@@ -31,12 +31,14 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
   bool _isShaking = false;
   int _shakeCount = 0;
   Timer? _resetTimer;
-  static const Duration _resetDuration = Duration(seconds: 5); // Reset after 5s of inactivity (increased from 3s)
+  static const Duration _resetDuration = Duration(
+    seconds: 5,
+  ); // Reset after 5s of inactivity (increased from 3s)
 
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -231,7 +233,12 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
     );
   }
 
-  void _showShakeDialog(BuildContext context, double progress, bool isComplete, int percentage) {
+  void _showShakeDialog(
+    BuildContext context,
+    double progress,
+    bool isComplete,
+    int percentage,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -250,20 +257,21 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                       colors: isComplete
                           ? [const Color(0xFF4CAF50), const Color(0xFF2E7D32)]
                           : _isShaking
-                              ? [const Color(0xFFFFD700), const Color(0xFFFF8C00)]
-                              : [const Color(0xFF2196F3), const Color(0xFF1565C0)],
+                          ? [const Color(0xFFFFD700), const Color(0xFFFF8C00)]
+                          : [const Color(0xFF2196F3), const Color(0xFF1565C0)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: (isComplete
-                                ? Colors.green
-                                : _isShaking
+                        color:
+                            (isComplete
+                                    ? Colors.green
+                                    : _isShaking
                                     ? Colors.orange
                                     : const Color(0xFF2196F3))
-                            .withValues(alpha: 0.5),
+                                .withValues(alpha: 0.5),
                         blurRadius: 30,
                       ),
                     ],
@@ -275,8 +283,8 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                         isComplete
                             ? Icons.celebration
                             : _isShaking
-                                ? Icons.vibration
-                                : Icons.phone_android,
+                            ? Icons.vibration
+                            : Icons.phone_android,
                         size: 60,
                         color: Colors.white,
                       ),
@@ -285,8 +293,8 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                         isComplete
                             ? 'SELAMAT! 🎉'
                             : _isShaking
-                                ? 'TERUS KOCOK!'
-                                : 'KOCOK HANDPHONE!',
+                            ? 'TERUS KOCOK!'
+                            : 'KOCOK HANDPHONE!',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
@@ -339,7 +347,8 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                                 return CustomPaint(
                                   painter: _CircularProgressPainter(
                                     progress: progress,
-                                    animationValue: _progressAnimationController.value,
+                                    animationValue:
+                                        _progressAnimationController.value,
                                     isShaking: _isShaking,
                                   ),
                                 );
@@ -356,7 +365,8 @@ class _ShakeDetectorWidgetState extends State<ShakeDetectorWidget>
                           ),
                         ],
                       ),
-                      if (_shakeCount > 0 && _shakeCount < widget.requiredShakes) ...[
+                      if (_shakeCount > 0 &&
+                          _shakeCount < widget.requiredShakes) ...[
                         const SizedBox(height: 16),
                         Text(
                           'Lanjutkan! ${100 - percentage}% lagi',
@@ -445,11 +455,7 @@ class _CircularProgressPainter extends CustomPainter {
         ..color = Colors.white.withValues(alpha: 1 - animationValue)
         ..style = PaintingStyle.fill;
 
-      canvas.drawCircle(
-        Offset(dotX, dotY),
-        6 + (6 * animationValue),
-        dotPaint,
-      );
+      canvas.drawCircle(Offset(dotX, dotY), 6 + (6 * animationValue), dotPaint);
     }
   }
 

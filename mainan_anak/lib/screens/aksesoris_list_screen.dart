@@ -65,11 +65,7 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.shopping_bag,
-                  size: 64,
-                  color: Colors.white,
-                ),
+                const Icon(Icons.shopping_bag, size: 64, color: Colors.white),
                 const SizedBox(height: 16),
                 const Text(
                   'Pilih Kategori',
@@ -82,10 +78,7 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
                 const SizedBox(height: 8),
                 const Text(
                   'Apa yang ingin kamu beli?',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white70,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.white70),
                 ),
                 const SizedBox(height: 32),
                 _buildCategoryButton(
@@ -212,9 +205,9 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -228,8 +221,8 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
             child: _isLoading
                 ? _buildShimmerLoading()
                 : _items.isEmpty
-                    ? const Center(child: Text('Tidak ada produk'))
-                    : _buildProductGrid(),
+                ? const Center(child: Text('Tidak ada produk'))
+                : _buildProductGrid(),
           ),
         ],
       ),
@@ -280,7 +273,10 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
                       const PopupMenuItem(value: 'JPY', child: Text('JPY')),
                     ],
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
@@ -291,7 +287,10 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
                             _selectedCurrency,
                             style: const TextStyle(color: Colors.white),
                           ),
-                          const Icon(Icons.arrow_drop_down, color: Colors.white),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.white,
+                          ),
                         ],
                       ),
                     ),
@@ -348,7 +347,9 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
                 height: 150,
                 decoration: BoxDecoration(
                   color: Colors.grey[800],
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                 ),
               ),
               Padding(
@@ -396,11 +397,11 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
   Widget _buildProductCard(int index) {
     final item = _items[index];
     final isApparel = item is Apparel;
-    
+
     String name, brand, imageUrl;
     double price;
     int stock;
-    
+
     if (isApparel) {
       final apparelItem = item;
       name = apparelItem.name;
@@ -413,7 +414,9 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
       name = aksesorisItem.name;
       brand = aksesorisItem.brand;
       price = aksesorisItem.price;
-      imageUrl = aksesorisItem.imageUrl.isNotEmpty ? aksesorisItem.imageUrl[0] : '';
+      imageUrl = aksesorisItem.imageUrl.isNotEmpty
+          ? aksesorisItem.imageUrl[0]
+          : '';
       stock = aksesorisItem.stock;
     }
 
@@ -434,10 +437,7 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(0, 50 * (1 - animation.value)),
-          child: Opacity(
-            opacity: animation.value,
-            child: child,
-          ),
+          child: Opacity(opacity: animation.value, child: child),
         );
       },
       child: Hero(
@@ -447,170 +447,189 @@ class _AksesorisListScreenState extends State<AksesorisListScreen>
           child: Card(
             margin: const EdgeInsets.only(bottom: 16),
             elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      AksesorisDetailScreen(
-                    item: item,
-                    isApparel: isApparel,
-                    heroTag: 'product_${isApparel ? 'apparel' : 'aksesoris'}_$index',
-                  ),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    const begin = Offset(1.0, 0.0);
-                    const end = Offset.zero;
-                    const curve = Curves.easeInOut;
-                    var tween = Tween(begin: begin, end: end).chain(
-                      CurveTween(curve: curve),
-                    );
-                    var offsetAnimation = animation.drive(tween);
-                    return SlideTransition(
-                      position: offsetAnimation,
-                      child: FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (imageUrl.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                    child: Image.network(
-                      imageUrl,
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: 200,
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Icon(
-                              isApparel ? Icons.checkroom : Icons.build,
-                              size: 80,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              isApparel 
-                                ? item.category
-                                : item.category,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue[700],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.business, size: 16, color: Colors.grey[600]),
-                          const SizedBox(width: 4),
-                          Text(
-                            brand,
-                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                          ),
-                          const SizedBox(width: 16),
-                          Icon(
-                            stock > 0 ? Icons.check_circle : Icons.cancel,
-                            size: 16,
-                            color: stock > 0 ? Colors.green : Colors.red,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            stock > 0 ? 'Stok: $stock' : 'Habis',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: stock > 0 ? Colors.green : Colors.red,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        isApparel 
-                          ? item.description
-                          : item.description,
-                        style: const TextStyle(fontSize: 14),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2196F3).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        AksesorisDetailScreen(
+                          item: item,
+                          isApparel: isApparel,
+                          heroTag:
+                              'product_${isApparel ? 'apparel' : 'aksesoris'}_$index',
                         ),
-                        child: Row(
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                          const begin = Offset(1.0, 0.0);
+                          const end = Offset.zero;
+                          const curve = Curves.easeInOut;
+                          var tween = Tween(
+                            begin: begin,
+                            end: end,
+                          ).chain(CurveTween(curve: curve));
+                          var offsetAnimation = animation.drive(tween);
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            ),
+                          );
+                        },
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (imageUrl.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                      child: Image.network(
+                        imageUrl,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 200,
+                            color: Colors.grey[300],
+                            child: Center(
+                              child: Icon(
+                                isApparel ? Icons.checkroom : Icons.build,
+                                size: 80,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Harga:',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                            Expanded(
+                              child: Text(
+                                name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                            Text(
-                              CurrencyHelper.formatCurrency(price, _selectedCurrency),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2196F3),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[50],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                isApparel ? item.category : item.category,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.business,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              brand,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Icon(
+                              stock > 0 ? Icons.check_circle : Icons.cancel,
+                              size: 16,
+                              color: stock > 0 ? Colors.green : Colors.red,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              stock > 0 ? 'Stok: $stock' : 'Habis',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: stock > 0 ? Colors.green : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          isApparel ? item.description : item.description,
+                          style: const TextStyle(fontSize: 14),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF2196F3,
+                            ).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Harga:',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                CurrencyHelper.formatCurrency(
+                                  price,
+                                  _selectedCurrency,
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2196F3),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
   }
 }

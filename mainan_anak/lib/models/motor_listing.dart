@@ -80,8 +80,12 @@ class MotorListing {
       kondisi: map['kondisi'] as String,
       deskripsi: map['deskripsi'] as String,
       lokasi: map['lokasi'] as String,
-      latitude: map['latitude'] != null ? (map['latitude'] as num).toDouble() : null,
-      longitude: map['longitude'] != null ? (map['longitude'] as num).toDouble() : null,
+      latitude: map['latitude'] != null
+          ? (map['latitude'] as num).toDouble()
+          : null,
+      longitude: map['longitude'] != null
+          ? (map['longitude'] as num).toDouble()
+          : null,
       fotoPath1: map['foto_path_1'] as String?,
       fotoPath2: map['foto_path_2'] as String?,
       fotoPath3: map['foto_path_3'] as String?,

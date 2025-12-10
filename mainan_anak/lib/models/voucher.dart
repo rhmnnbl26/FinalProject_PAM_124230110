@@ -63,7 +63,9 @@ class Voucher {
       type: map['type'],
       dateObtained: DateTime.parse(map['dateObtained']),
       expiryDate: DateTime.parse(map['expiryDate']),
-      dateUsed: map['dateUsed'] != null ? DateTime.parse(map['dateUsed']) : null,
+      dateUsed: map['dateUsed'] != null
+          ? DateTime.parse(map['dateUsed'])
+          : null,
       isUsed: map['isUsed'] == 1,
       bengkelName: map['bengkelName'],
       bengkelDistance: map['bengkelDistance'],

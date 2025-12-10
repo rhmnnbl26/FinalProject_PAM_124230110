@@ -102,8 +102,8 @@ class LbsService {
         'distance': distance,
         'distanceFormatted': distance != null
             ? (distance < 1
-                ? '${(distance * 1000).toStringAsFixed(0)} m'
-                : '${distance.toStringAsFixed(2)} km')
+                  ? '${(distance * 1000).toStringAsFixed(0)} m'
+                  : '${distance.toStringAsFixed(2)} km')
             : 'N/A',
       };
     } catch (e) {
@@ -128,7 +128,10 @@ class LbsService {
   }
 
   // Calculate distance from current position to motor location
-  Future<double?> calculateDistanceToMotor(double? motorLat, double? motorLng) async {
+  Future<double?> calculateDistanceToMotor(
+    double? motorLat,
+    double? motorLng,
+  ) async {
     if (motorLat == null || motorLng == null) return null;
 
     try {
@@ -150,7 +153,7 @@ class LbsService {
   // Format distance to readable string
   String formatDistance(double? distanceKm) {
     if (distanceKm == null) return 'Lokasi tidak tersedia';
-    
+
     if (distanceKm < 1) {
       return '${(distanceKm * 1000).toStringAsFixed(0)} m';
     } else if (distanceKm < 10) {
@@ -160,4 +163,3 @@ class LbsService {
     }
   }
 }
-

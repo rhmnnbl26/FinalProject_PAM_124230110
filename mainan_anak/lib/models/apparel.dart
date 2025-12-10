@@ -30,9 +30,15 @@ class Apparel {
       id: json['id'].toString(),
       name: json['name'] as String? ?? '',
       brand: json['brand'] as String? ?? '',
-      size: (json['size'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      size:
+          (json['size'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
+          [],
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      imageUrl: (json['imageUrl'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      imageUrl:
+          (json['imageUrl'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       category: json['category'] as String? ?? '',
       gender: json['gender'] as String? ?? '',
       stock: (json['stock'] as num?)?.toInt() ?? 0,
